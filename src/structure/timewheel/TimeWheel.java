@@ -1,5 +1,6 @@
 package structure.timewheel;
 
+import java.util.concurrent.DelayQueue;
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
  *
@@ -25,18 +26,20 @@ public class TimeWheel {
     /** 上层时间轮 */
     private volatile TimeWheel overflowWheel;
 
-    public TimeWheel(long tickMs, int wheelSize, long currentTimestamp) {
+    private DelayQueue<Bucket> delayQueue;
+
+    public TimeWheel(long tickMs, int wheelSize, long currentTimestamp, DelayQueue<Bucket> delayQueue) {
         this.currentTimestamp = currentTimestamp;
         this.tickMs = tickMs;
         this.wheelSize = wheelSize;
         this.interval = tickMs * wheelSize;
         this.buckets = new Bucket[wheelSize];
+        this.currentTimestamp = currentTimestamp - (currentTimestamp % tickMs);
+        this.delayQueue = delayQueue;
 
         for (int i = 0; i < wheelSize; i++) {
             buckets[i] = new Bucket();
         }
-
-        this.currentTimestamp = currentTimestamp - (currentTimestamp % tickMs);
     }
 
     private TimeWheel getOverflowWheel() {
