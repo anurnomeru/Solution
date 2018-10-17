@@ -8,13 +8,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class Timer {
 
+    /** 最底层的那个时间轮 */
     private TimeWheel timeWheel;
 
-    /**
-     * 对于一个Timer以及附属的时间轮
-     */
+    /** 对于一个Timer以及附属的时间轮，都只有一个delayQueue */
     private DelayQueue<Bucket> delayQueue = new DelayQueue<>();
 
+    /**
+     * 新建一个Timer，同时新建一个时间轮
+     */
     public Timer() {
         timeWheel = new TimeWheel(20, 10, System.currentTimeMillis(), delayQueue);
     }
