@@ -9,27 +9,24 @@ import java.util.concurrent.Callable;
  */
 public class TimedTask {
 
-    /** 执行时间 */
-    private long executeTimestamp;
+    /** 延迟多久执行时间 */
+    private long delayMs;
 
     /** 任务 */
     private Callable<Void> task;
 
-    public TimedTask(long executeTimestamp, Callable<Void> task) {
-        this.executeTimestamp = executeTimestamp;
+    public TimedTask(long delayMs, Callable<Void> task) {
+        this.delayMs = delayMs;
         this.task = task;
-    }
-
-    /**
-     * 0 代表已经到了执行时间
-     */
-    public long getDelayTime(long currentTimestamp) {
-        return Math.min(currentTimestamp - executeTimestamp, 0L);
     }
 
     public void execute() throws Exception {
         if (task != null) {
             task.call();
         }
+    }
+
+    public long getDelayMs() {
+        return delayMs;
     }
 }
