@@ -1,4 +1,4 @@
-package structure;
+package structure.timewheel;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
@@ -15,13 +15,31 @@ public class TimeWheel {
 
     private long currentTimestamp;
 
+    private volatile TimeWheel overflowWheel;
+
     public TimeWheel(long tickMs, int wheelSize, long currentTimestamp) {
         this.currentTimestamp = currentTimestamp;
         this.tickMs = tickMs;
         this.wheelSize = wheelSize;
         this.interval = tickMs * wheelSize;
         this.buckets = new Bucket[wheelSize];
+
+        for (int i = 0; i < wheelSize; i++) {
+            buckets[i] = new Bucket();
+        }
+
         this.currentTimestamp = currentTimestamp - (currentTimestamp % tickMs);
+    }
+
+    private TimeWheel getOverflowWheel() {
+        if (overflowWheel == null) {
+            synchronized (this) {
+                if (overflowWheel == null) {
+                    overflowWheel = new TimeWheel(interval, wheelSize, currentTimestamp);
+                }
+            }
+        }
+        return overflowWheel;
     }
 
     public boolean addTask(TimedTask timedTask) {
@@ -36,8 +54,13 @@ public class TimeWheel {
 
         int maybeInThisBucket = (int) (delayTimestamp / tickMs);
 
-        if (maybeInThisBucket < wheelSize) {// 当maybeInThisBucket大于等于wheelSize时，需要将它扔到上一层的时间轮
+        if (maybeInThisBucket < wheelSize) {// 扔进当前时间轮的某个槽中
             Bucket bucket = buckets[maybeInThisBucket];
+            bucket.addTask(timedTask);
+        } else {
+            TimeWheel timeWheel = getOverflowWheel();// 当maybeInThisBucket大于等于wheelSize时，需要将它扔到上一层的时间轮
+            timeWheel.addTask(timedTask);
         }
+        return true;
     }
 }

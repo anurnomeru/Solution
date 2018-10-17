@@ -1,4 +1,4 @@
-package structure;
+package structure.timewheel;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
