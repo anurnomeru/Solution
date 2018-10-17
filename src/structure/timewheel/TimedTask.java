@@ -1,7 +1,11 @@
 package structure.timewheel;
 
+import java.util.concurrent.Callable;
+
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
+ *
+ * 需要延迟执行的任务，放在槽 {@link Bucket} 里面
  */
 public class TimedTask {
 
@@ -9,9 +13,9 @@ public class TimedTask {
     private long executeTimestamp;
 
     /** 任务 */
-    private Runnable task;
+    private Callable<Void> task;
 
-    public TimedTask(long executeTimestamp, Runnable task) {
+    public TimedTask(long executeTimestamp, Callable<Void> task) {
         this.executeTimestamp = executeTimestamp;
         this.task = task;
     }
@@ -21,5 +25,11 @@ public class TimedTask {
      */
     public long getDelayTime(long currentTimestamp) {
         return Math.min(currentTimestamp - executeTimestamp, 0L);
+    }
+
+    public void execute() throws Exception {
+        if (task != null) {
+            task.call();
+        }
     }
 }

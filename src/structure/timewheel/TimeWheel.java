@@ -2,19 +2,27 @@ package structure.timewheel;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
+ *
+ * 时间轮，可以推进时间和添加任务
  */
 public class TimeWheel {
 
-    private long tickMs;// 一个时间槽的时间
+    /** 一个时间槽的时间 */
+    private long tickMs;
 
-    private int wheelSize;// 时间轮大小
+    /** 时间轮大小 */
+    private int wheelSize;
 
-    private long interval;// 时间跨度
+    /** 时间跨度 */
+    private long interval;
 
-    private Bucket[] buckets;// 槽
+    /** 槽 */
+    private Bucket[] buckets;
 
+    /** 时间轮指针 */
     private long currentTimestamp;
 
+    /** 上层时间轮 */
     private volatile TimeWheel overflowWheel;
 
     public TimeWheel(long tickMs, int wheelSize, long currentTimestamp) {
@@ -54,7 +62,7 @@ public class TimeWheel {
 
         int maybeInThisBucket = (int) (delayTimestamp / tickMs);
 
-        if (maybeInThisBucket < wheelSize) {// 扔进当前时间轮的某个槽中
+        if (maybeInThisBucket < wheelSize) {// 扔进当前时间轮的某个槽中，只有时间【大于某个槽】，才会放进去
             Bucket bucket = buckets[maybeInThisBucket];
             bucket.addTask(timedTask);
         } else {
@@ -62,5 +70,19 @@ public class TimeWheel {
             timeWheel.addTask(timedTask);
         }
         return true;
+    }
+
+    /**
+     * 尝试推进一下指针
+     */
+    public void advanceClock(long timestamp) {
+        if (timestamp - tickMs > currentTimestamp) {
+            currentTimestamp = timestamp - (timestamp % tickMs);
+
+            if (overflowWheel != null) {
+                this.getOverflowWheel()
+                    .advanceClock(timestamp);
+            }
+        }
     }
 }

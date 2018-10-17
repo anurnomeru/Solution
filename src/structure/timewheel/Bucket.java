@@ -5,6 +5,8 @@ import java.util.List;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
+ *
+ * 槽、或者说桶
  */
 public class Bucket {
 
