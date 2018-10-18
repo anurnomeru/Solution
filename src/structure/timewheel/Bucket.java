@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
@@ -47,13 +49,14 @@ public class Bucket implements Delayed {
     }
 
     /**
-     * 执行这个槽里面所有的任务
+     * 重新分配槽
      */
-    public synchronized void exec() throws Exception {
-        for (TimedTask timedTask : timedTaskList) {
-            timedTask.execute();
-        }
-        timedTaskList = new ArrayList<>();
+    public synchronized void flush(Consumer<TimedTask> flush) {
+        timedTaskList.iterator()
+                     .forEachRemaining(timedTask -> {
+                         timedTaskList.remove(timedTask);
+                         flush.accept(timedTask);
+                     });
     }
 
     @Override

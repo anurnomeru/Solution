@@ -21,19 +21,22 @@ public class Timer {
         timeWheel = new TimeWheel(20, 10, System.currentTimeMillis(), delayQueue);
     }
 
-    public void add(TimedTask timedTask) {
+    /**
+     * 将任务添加到时间轮
+     */
+    public void addTask(TimedTask timedTask) {
         timeWheel.addTask(timedTask);
     }
 
     /**
-     * 推进一下时间轮的指针，并且将delayQueue中的任务取出来执行一下
+     * 推进一下时间轮的指针，并且将delayQueue中的任务取出来再重新扔进去
      */
     public void advanceClock(long timeout) {
         try {
             Bucket bucket = delayQueue.poll(timeout, TimeUnit.MILLISECONDS);
             if (bucket != null) {
                 timeWheel.advanceClock(bucket.getExpire());
-                bucket.exec();
+                bucket.flush(this::addTask);
             }
         } catch (Exception e) {
             e.printStackTrace();
