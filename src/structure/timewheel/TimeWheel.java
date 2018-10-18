@@ -63,18 +63,18 @@ public class TimeWheel {
         }
 
         long delayMs = timedTask.getDelayMs();
-        if (delayMs <= 0) {
+        if (delayMs <= 0) {// 到期了
             return false;
         }
 
         // 扔进当前时间轮的某个槽中，只有时间【大于某个槽】，才会放进去
         if (delayMs < interval) {
-            int inThisBucket = (int) (delayMs + currentTimestamp / tickMs) % wheelSize;
+            int bucketIndex = (int) ((delayMs + currentTimestamp) / tickMs) % wheelSize;
 
-            Bucket bucket = buckets[inThisBucket];
+            Bucket bucket = buckets[bucketIndex];
             bucket.addTask(timedTask);
 
-            if (bucket.setExpire(inThisBucket * tickMs)) {
+            if (bucket.setExpire(delayMs + currentTimestamp - (delayMs + currentTimestamp) % tickMs)) {
                 delayQueue.offer(bucket);
             }
         } else {
