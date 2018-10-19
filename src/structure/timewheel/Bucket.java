@@ -77,7 +77,7 @@ public class Bucket implements Delayed {
     public synchronized void flush(Consumer<TimedTask> flush) {
         TimedTask timedTask = root.next;
 
-        while (!timedTask.equals(root.next)) {
+        while (!timedTask.equals(root)) {
             this.removeTask(timedTask);
             flush.accept(timedTask);
             timedTask = root.next;

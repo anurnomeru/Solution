@@ -62,8 +62,9 @@ public class TimeWheel {
             return false;
         }
 
-        long delayMs = timedTask.getDelayMs();
-        if (delayMs <= 0) {// 到期了
+        long expireTimestamp = timedTask.getExpireTimestamp();
+        long delayMs = expireTimestamp - currentTimestamp;
+        if (delayMs < tickMs) {// 到期了
             return false;
         }
 

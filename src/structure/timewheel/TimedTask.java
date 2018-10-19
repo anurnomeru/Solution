@@ -10,6 +10,9 @@ public class TimedTask {
     /** 延迟多久执行时间 */
     private long delayMs;
 
+    /** 过期时间戳 */
+    private long expireTiemstamp;
+
     /** 任务 */
     private Runnable task;
 
@@ -25,6 +28,7 @@ public class TimedTask {
         this.bucket = null;
         this.next = null;
         this.pre = null;
+        this.expireTiemstamp = System.currentTimeMillis() + delayMs;
     }
 
     public Runnable getTask() {
@@ -33,5 +37,9 @@ public class TimedTask {
 
     public long getDelayMs() {
         return delayMs;
+    }
+
+    public long getExpireTimestamp() {
+        return expireTiemstamp;
     }
 }
