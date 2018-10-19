@@ -1,7 +1,5 @@
 package structure.timewheel;
 
-import java.util.concurrent.Callable;
-
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
  *
@@ -13,17 +11,15 @@ public class TimedTask {
     private long delayMs;
 
     /** 任务 */
-    private Callable<Void> task;
+    private Runnable task;
 
-    public TimedTask(long delayMs, Callable<Void> task) {
+    public TimedTask(long delayMs, Runnable task) {
         this.delayMs = delayMs;
         this.task = task;
     }
 
-    public void execute() throws Exception {
-        if (task != null) {
-            task.call();
-        }
+    public Runnable getTask() {
+        return task;
     }
 
     public long getDelayMs() {

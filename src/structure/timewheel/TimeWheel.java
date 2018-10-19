@@ -69,7 +69,7 @@ public class TimeWheel {
 
         // 扔进当前时间轮的某个槽中，只有时间【大于某个槽】，才会放进去
         if (delayMs < interval) {
-            int bucketIndex = (int) ((delayMs + currentTimestamp) / tickMs) % wheelSize;
+            int bucketIndex = (int) (((delayMs + currentTimestamp) / tickMs) % wheelSize);
 
             Bucket bucket = buckets[bucketIndex];
             bucket.addTask(timedTask);
