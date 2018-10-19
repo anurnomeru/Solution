@@ -1,8 +1,6 @@
 package structure.timewheel;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -18,7 +16,13 @@ public class Bucket implements Delayed {
     /** 当前槽的过期时间 */
     private AtomicLong expiration = new AtomicLong(-1L);
 
-    private List<TimedTask> timedTaskList = new ArrayList<>();
+    /** 根节点 */
+    private TimedTask root = new TimedTask(-1L, null);
+
+    {
+        root.pre = root;
+        root.next = root;
+    }
 
     /**
      * 设置某个槽的过期时间
@@ -38,14 +42,17 @@ public class Bucket implements Delayed {
      * 新增任务到链表
      */
     public synchronized boolean addTask(TimedTask timedTask) {
-        return timedTaskList.add(timedTask);
-    }
 
-    /**
-     * 将某个任务删除
-     */
-    public synchronized boolean removeTask(TimedTask timedTask) {
-        return timedTaskList.remove(timedTask);
+        if (timedTask.bucket == null) {
+            TimedTask tail = root.pre;
+
+            timedTask.bucket = this;
+
+
+            timedTask.pre = root;
+        }
+
+        return timedTaskList.add(timedTask);
     }
 
     /**

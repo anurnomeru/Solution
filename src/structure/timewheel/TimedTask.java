@@ -13,9 +13,18 @@ public class TimedTask {
     /** 任务 */
     private Runnable task;
 
+    public Bucket bucket;
+
+    public TimedTask next;
+
+    public TimedTask pre;
+
     public TimedTask(long delayMs, Runnable task) {
         this.delayMs = delayMs;
         this.task = task;
+        this.bucket = null;
+        this.next = null;
+        this.pre = null;
     }
 
     public Runnable getTask() {
