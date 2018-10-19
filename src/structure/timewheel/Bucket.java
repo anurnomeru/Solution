@@ -1,6 +1,5 @@
 package structure.timewheel;
 
-import java.util.Iterator;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -39,39 +38,56 @@ public class Bucket implements Delayed {
     }
 
     /**
-     * 新增任务到链表
+     * 新增任务到bucket
+     *
+     * todo 待看
      */
-    public synchronized boolean addTask(TimedTask timedTask) {
+    public void addTask(TimedTask timedTask) {
+        synchronized (timedTask) {
+            if (timedTask.bucket == null) {
+                TimedTask tail = root.pre;
 
-        if (timedTask.bucket == null) {
-            TimedTask tail = root.pre;
+                timedTask.next = root;
+                timedTask.pre = tail;
 
-            timedTask.bucket = this;
+                timedTask.bucket = this;
 
-
-            timedTask.pre = root;
+                tail.next = timedTask;
+                root.pre = timedTask;
+            }
         }
+    }
 
-        return timedTaskList.add(timedTask);
+    /**
+     * 从bucket移除任务
+     */
+    public void removeTask(TimedTask timedTask) {
+        synchronized (timedTask) {
+            timedTask.next.pre = timedTask.pre;
+            timedTask.pre.next = timedTask.next;
+            timedTask.bucket = null;
+            timedTask.next = null;
+            timedTask.pre = null;
+        }
     }
 
     /**
      * 重新分配槽
      */
     public synchronized void flush(Consumer<TimedTask> flush) {
-        Iterator<TimedTask> timedTaskIterator = timedTaskList.iterator();
-        TimedTask timedTask;
-        while (timedTaskIterator.hasNext()) {
-            timedTask = timedTaskIterator.next();
-            timedTaskIterator.remove();
+        TimedTask timedTask = root.next;
+
+        while (!timedTask.equals(root.next)) {
+            this.removeTask(timedTask);
             flush.accept(timedTask);
+            timedTask = root.next;
         }
+        expiration.set(-1L);
     }
 
     @Override
     public long getDelay(TimeUnit unit) {
-        return Math.max(0, unit.convert(expiration.get() - System.currentTimeMillis(), TimeUnit.MILLISECONDS))
-            ;
+        return Math.max(0, unit.convert(expiration.get() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
     }
 
     @Override
