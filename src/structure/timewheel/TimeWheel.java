@@ -1,6 +1,5 @@
 package structure.timewheel;
 
-import java.util.Date;
 import java.util.concurrent.DelayQueue;
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
@@ -76,7 +75,6 @@ public class TimeWheel {
             bucket.addTask(timedTask);
 
             if (bucket.setExpire(delayMs + currentTimestamp - (delayMs + currentTimestamp) % tickMs)) {
-                System.out.println(new Date(bucket.getExpire()).toString());
                 delayQueue.offer(bucket);
             }
         } else {

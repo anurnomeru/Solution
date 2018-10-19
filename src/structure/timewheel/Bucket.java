@@ -1,6 +1,7 @@
 package structure.timewheel;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -51,11 +52,13 @@ public class Bucket implements Delayed {
      * 重新分配槽
      */
     public synchronized void flush(Consumer<TimedTask> flush) {
-        timedTaskList.iterator()
-                     .forEachRemaining(timedTask -> {
-                         timedTaskList.remove(timedTask);
-                         flush.accept(timedTask);
-                     });
+        Iterator<TimedTask> timedTaskIterator = timedTaskList.iterator();
+        TimedTask timedTask;
+        while (timedTaskIterator.hasNext()) {
+            timedTask = timedTaskIterator.next();
+            timedTaskIterator.remove();
+            flush.accept(timedTask);
+        }
     }
 
     @Override
