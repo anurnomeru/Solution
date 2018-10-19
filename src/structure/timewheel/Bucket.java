@@ -60,13 +60,13 @@ public class Bucket implements Delayed {
 
     @Override
     public long getDelay(TimeUnit unit) {
-        return unit.convert(expiration.get(), TimeUnit.MILLISECONDS);
+        return Math.max(0, unit.convert(expiration.get() - System.currentTimeMillis(), TimeUnit.MILLISECONDS))
+            ;
     }
 
     @Override
     public int compareTo(Delayed o) {
         if (o instanceof Bucket) {
-
             return Long.compare(expiration.get(), ((Bucket) o).expiration.get());
         }
         return 0;

@@ -17,16 +17,15 @@ public class Timer {
         Timer timer = new Timer();
 
         for (int i = 0; i < 1000; i++) {
-            long ms = TimeUnit.SECONDS.toMillis(random.nextInt(100));
+            long ms = TimeUnit.SECONDS.toMillis(random.nextInt(60));
             timer.addTask(new TimedTask(
                 ms
                 , () -> System.out.println("啦啦啦啦啦啦啦:" + ms)));
         }
 
         while (true) {
-            timer.advanceClock(System.currentTimeMillis());
+            timer.advanceClock(1000);
         }
-
     }
 
     /** 最底层的那个时间轮 */
