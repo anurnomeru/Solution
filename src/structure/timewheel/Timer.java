@@ -16,15 +16,15 @@ public class Timer {
     public static void main(String[] args) {
         Timer timer = new Timer();
 
-        for (int i = 0; i < 100; i++) {
-            long ms = TimeUnit.SECONDS.toMillis(random.nextInt(20));
+        for (int i = 0; i < 1000; i++) {
+            long ms = random.nextInt(10000);
             timer.addTask(new TimedTask(
                 ms
                 , () -> System.out.println("啦啦啦啦啦啦啦:" + ms)));
         }
 
         while (true) {
-            timer.advanceClock(1000);
+            timer.advanceClock(20);
         }
     }
 
