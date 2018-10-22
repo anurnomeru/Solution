@@ -16,8 +16,8 @@ public class Timer {
     public static void main(String[] args) {
         Timer timer = new Timer();
 
-        for (int i = 0; i < 1000; i++) {
-            long ms = random.nextInt(10000);
+        for (int i = 0; i < 1000000; i++) {
+            long ms = random.nextInt(1000000);
             timer.addTask(new TimedTask(
                 ms
                 , () -> System.out.println("延迟任务消费：" + ms)));
@@ -57,13 +57,13 @@ public class Timer {
      */
     public void advanceClock(long timeout) {
         try {
-            System.out.println(this.getClass() + "：进行 poll 操作");
+            // System.out.println(this.getClass() + "：进行 poll 操作");
             Bucket bucket = delayQueue.poll(timeout, TimeUnit.MILLISECONDS);
-            System.out.println(this.getClass() + "：poll 成功，获取到：" + (bucket == null ? "null" : bucket.toString()));
+            // System.out.println(this.getClass() + "：poll 成功，获取到：" + (bucket == null ? "null" : bucket.toString()));
             if (bucket != null) {
-                System.out.println(this.getClass() + "：推动时间轮前进！");
+                // System.out.println(this.getClass() + "：推动时间轮前进！");
                 timeWheel.advanceClock(bucket.getExpire());
-                System.out.println(this.getClass() + "：重新将bucket内容分配到新的时间轮，并且执行已经过期的任务！");
+                // System.out.println(this.getClass() + "：重新将bucket内容分配到新的时间轮，并且执行已经过期的任务！");
                 bucket.flush(this::addTask);
             }
         } catch (Exception e) {
