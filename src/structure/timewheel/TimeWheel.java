@@ -1,6 +1,7 @@
 package structure.timewheel;
 
 import java.util.concurrent.DelayQueue;
+import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
  *
@@ -29,7 +30,9 @@ public class TimeWheel {
     /** 对于一个Timer以及附属的时间轮，都只有一个delayQueue */
     private DelayQueue<Bucket> delayQueue;
 
-    public TimeWheel(long tickMs, int wheelSize, long currentTimestamp, DelayQueue<Bucket> delayQueue) {
+    private volatile AtomicLong taskCounter;
+
+    public TimeWheel(long tickMs, int wheelSize, long currentTimestamp, DelayQueue<Bucket> delayQueue, AtomicLong taskCounter) {
         this.currentTimestamp = currentTimestamp;
         this.tickMs = tickMs;
         this.wheelSize = wheelSize;
@@ -37,6 +40,7 @@ public class TimeWheel {
         this.buckets = new Bucket[wheelSize];
         this.currentTimestamp = currentTimestamp - (currentTimestamp % tickMs);
         this.delayQueue = delayQueue;
+        this.taskCounter = taskCounter;
 
         for (int i = 0; i < wheelSize; i++) {
             buckets[i] = new Bucket();
@@ -47,7 +51,7 @@ public class TimeWheel {
         if (overflowWheel == null) {
             synchronized (this) {
                 if (overflowWheel == null) {
-                    overflowWheel = new TimeWheel(interval, wheelSize, currentTimestamp, delayQueue);
+                    overflowWheel = new TimeWheel(interval, wheelSize, currentTimestamp, delayQueue, taskCounter);
                 }
             }
         }
@@ -58,29 +62,27 @@ public class TimeWheel {
      * 添加任务到某个时间轮
      */
     public boolean addTask(TimedTask timedTask) {
-        if (timedTask == null) {
-            return false;
-        }
-
         long expireTimestamp = timedTask.getExpireTimestamp();
         long delayMs = expireTimestamp - currentTimestamp;
         if (delayMs < tickMs) {// 到期了
             return false;
-        }
-
-        // 扔进当前时间轮的某个槽中，只有时间【大于某个槽】，才会放进去
-        if (delayMs < interval) {
-            int bucketIndex = (int) (((delayMs + currentTimestamp) / tickMs) % wheelSize);
-
-            Bucket bucket = buckets[bucketIndex];
-            bucket.addTask(timedTask);
-
-            if (bucket.setExpire(delayMs + currentTimestamp - (delayMs + currentTimestamp) % tickMs)) {
-                delayQueue.offer(bucket);
-            }
         } else {
-            TimeWheel timeWheel = getOverflowWheel();// 当maybeInThisBucket大于等于wheelSize时，需要将它扔到上一层的时间轮
-            timeWheel.addTask(timedTask);
+
+            // 扔进当前时间轮的某个槽中，只有时间【大于某个槽】，才会放进去
+            if (delayMs < interval) {
+                int bucketIndex = (int) (((delayMs + currentTimestamp) / tickMs) % wheelSize);
+
+                Bucket bucket = buckets[bucketIndex];
+
+                bucket.addTask(timedTask);
+
+                if (bucket.setExpire(delayMs + currentTimestamp - (delayMs + currentTimestamp) % tickMs)) {
+                    delayQueue.offer(bucket);
+                }
+            } else {
+                TimeWheel timeWheel = getOverflowWheel();// 当maybeInThisBucket大于等于wheelSize时，需要将它扔到上一层的时间轮
+                timeWheel.addTask(timedTask);
+            }
         }
         return true;
     }

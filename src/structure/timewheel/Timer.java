@@ -5,6 +5,7 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/10/17
@@ -16,17 +17,24 @@ public class Timer {
     public static void main(String[] args) {
         Timer timer = new Timer();
 
-        for (int i = 0; i < 1000000; i++) {
-            long ms = random.nextInt(1000000);
+        for (int i = 0; i < 6000000; i++) {
+            long ms = random.nextInt(60000);
             timer.addTask(new TimedTask(
                 ms
                 , () -> System.out.println("延迟任务消费：" + ms)));
         }
 
+        long start = System.currentTimeMillis();
         while (true) {
+            if (timer.taskCounter.get() == 0L) {
+                System.out.println(System.currentTimeMillis() - start);
+            }
             timer.advanceClock(20);
         }
     }
+
+    /** 计数 */
+    public volatile AtomicLong taskCounter = new AtomicLong(0);
 
     /** 最底层的那个时间轮 */
     private TimeWheel timeWheel;
@@ -37,19 +45,19 @@ public class Timer {
     private ExecutorService taskExecutor = Executors.newFixedThreadPool(1); // 只有一个线程的无限阻塞队列线程池
 
     /**
+     * 新建一个Timer，同时新建一个时间轮
+     */
+    public Timer() {
+        timeWheel = new TimeWheel(20, 10, System.currentTimeMillis(), delayQueue, taskCounter);
+    }
+
+    /**
      * 将任务添加到时间轮
      */
     public void addTask(TimedTask timedTask) {
         if (!timeWheel.addTask(timedTask)) {
             taskExecutor.submit(timedTask.getTask());
         }
-    }
-
-    /**
-     * 新建一个Timer，同时新建一个时间轮
-     */
-    public Timer() {
-        timeWheel = new TimeWheel(20, 10, System.currentTimeMillis(), delayQueue);
     }
 
     /**
