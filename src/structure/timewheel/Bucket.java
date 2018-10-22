@@ -1,5 +1,6 @@
 package structure.timewheel;
 
+import java.util.Date;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -45,12 +46,11 @@ public class Bucket implements Delayed {
     public void addTask(TimedTask timedTask) {
         synchronized (timedTask) {
             if (timedTask.bucket == null) {
+                timedTask.bucket = this;
                 TimedTask tail = root.pre;
 
                 timedTask.next = root;
                 timedTask.pre = tail;
-
-                timedTask.bucket = this;
 
                 tail.next = timedTask;
                 root.pre = timedTask;
@@ -63,11 +63,13 @@ public class Bucket implements Delayed {
      */
     public void removeTask(TimedTask timedTask) {
         synchronized (timedTask) {
-            timedTask.next.pre = timedTask.pre;
-            timedTask.pre.next = timedTask.next;
-            timedTask.bucket = null;
-            timedTask.next = null;
-            timedTask.pre = null;
+            if (timedTask.bucket.equals(this)) {// 这里可能有bug
+                timedTask.next.pre = timedTask.pre;
+                timedTask.pre.next = timedTask.next;
+                timedTask.bucket = null;
+                timedTask.next = null;
+                timedTask.pre = null;
+            }
         }
     }
 
@@ -75,7 +77,7 @@ public class Bucket implements Delayed {
      * 重新分配槽
      */
     public synchronized void flush(Consumer<TimedTask> flush) {
-        TimedTask timedTask = root.next;
+        TimedTask timedTask = root.next;// 从尾巴开始（最先加进去的）
 
         while (!timedTask.equals(root)) {
             this.removeTask(timedTask);
@@ -96,5 +98,13 @@ public class Bucket implements Delayed {
             return Long.compare(expiration.get(), ((Bucket) o).expiration.get());
         }
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Bucket{" +
+            "过期时间=" + new Date(expiration.get()).toString() +
+            ", 延迟=" + this.getDelay(TimeUnit.SECONDS) + "s" +
+            '}';
     }
 }

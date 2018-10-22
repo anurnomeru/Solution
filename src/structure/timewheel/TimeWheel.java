@@ -89,7 +89,7 @@ public class TimeWheel {
      * 尝试推进一下指针
      */
     public void advanceClock(long timestamp) {
-        if (timestamp - tickMs > currentTimestamp) {
+        if (timestamp >= currentTimestamp + tickMs) {
             currentTimestamp = timestamp - (timestamp % tickMs);
 
             if (overflowWheel != null) {
