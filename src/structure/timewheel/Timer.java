@@ -16,29 +16,6 @@ public class Timer {
     public static Random random = new Random();
 
     public static void main(String[] args) {
-        java.util.Timer timer = new java.util.Timer();
-
-        AtomicLong taskCounter = new AtomicLong(0);
-        long start = System.currentTimeMillis();
-
-        for (int i = 0; i < 6000000; i++) {
-            long ms = random.nextInt(60000);
-            taskCounter.incrementAndGet();
-            timer.schedule(new TimerTask() {
-
-                @Override
-                public void run() {
-                    System.out.println("延迟任务消费：" + ms);
-                    taskCounter.decrementAndGet();
-                }
-            }, i);
-        }
-
-        while (taskCounter.get() == 0) {
-            System.out.println("耗时" + (System.currentTimeMillis() - start));
-            break;
-        }
-
         // Timer timer = new Timer();
         //
         // for (int i = 0; i < 6000000; i++) {
