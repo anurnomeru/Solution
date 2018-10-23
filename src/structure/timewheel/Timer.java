@@ -1,6 +1,7 @@
 package structure.timewheel;
 
 import java.util.Random;
+import java.util.TimerTask;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,22 +16,51 @@ public class Timer {
     public static Random random = new Random();
 
     public static void main(String[] args) {
-        Timer timer = new Timer();
+        java.util.Timer timer = new java.util.Timer();
+
+        AtomicLong taskCounter = new AtomicLong(0);
+        long start = System.currentTimeMillis();
 
         for (int i = 0; i < 6000000; i++) {
             long ms = random.nextInt(60000);
-            timer.addTask(new TimedTask(
-                ms
-                , () -> System.out.println("延迟任务消费：" + ms)));
+            taskCounter.incrementAndGet();
+            timer.schedule(new TimerTask() {
+
+                @Override
+                public void run() {
+                    System.out.println("延迟任务消费：" + ms);
+                    taskCounter.decrementAndGet();
+                }
+            }, i);
         }
 
-        long start = System.currentTimeMillis();
-        while (true) {
-            if (timer.taskCounter.get() == 0L) {
-                System.out.println(System.currentTimeMillis() - start);
-            }
-            timer.advanceClock(20);
+        while (taskCounter.get() == 0) {
+            System.out.println("耗时" + (System.currentTimeMillis() - start));
+            break;
         }
+
+        // Timer timer = new Timer();
+        //
+        // for (int i = 0; i < 6000000; i++) {
+        //     timer.taskCounter.incrementAndGet();
+        //     long ms = random.nextInt(60000);
+        //     timer.addTask(new TimedTask(
+        //         ms
+        //         ,
+        //         () -> {
+        //             System.out.println("延迟任务消费：" + ms);
+        //             timer.taskCounter.decrementAndGet();
+        //         }));
+        // }
+        //
+        // long start = System.currentTimeMillis();
+        // while (true) {
+        //     timer.advanceClock(20);
+        //     if (timer.taskCounter.get() == 0L) {
+        //         System.out.println("耗时" + (System.currentTimeMillis() - start));
+        //         break;
+        //     }
+        // }
     }
 
     /** 计数 */
@@ -48,7 +78,7 @@ public class Timer {
      * 新建一个Timer，同时新建一个时间轮
      */
     public Timer() {
-        timeWheel = new TimeWheel(20, 10, System.currentTimeMillis(), delayQueue, taskCounter);
+        timeWheel = new TimeWheel(20, 10, System.currentTimeMillis(), delayQueue);
     }
 
     /**

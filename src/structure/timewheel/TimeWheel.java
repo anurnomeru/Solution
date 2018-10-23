@@ -1,7 +1,6 @@
 package structure.timewheel;
 
 import java.util.concurrent.DelayQueue;
-import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
  *
@@ -30,9 +29,7 @@ public class TimeWheel {
     /** 对于一个Timer以及附属的时间轮，都只有一个delayQueue */
     private DelayQueue<Bucket> delayQueue;
 
-    private volatile AtomicLong taskCounter;
-
-    public TimeWheel(long tickMs, int wheelSize, long currentTimestamp, DelayQueue<Bucket> delayQueue, AtomicLong taskCounter) {
+    public TimeWheel(long tickMs, int wheelSize, long currentTimestamp, DelayQueue<Bucket> delayQueue) {
         this.currentTimestamp = currentTimestamp;
         this.tickMs = tickMs;
         this.wheelSize = wheelSize;
@@ -40,7 +37,6 @@ public class TimeWheel {
         this.buckets = new Bucket[wheelSize];
         this.currentTimestamp = currentTimestamp - (currentTimestamp % tickMs);
         this.delayQueue = delayQueue;
-        this.taskCounter = taskCounter;
 
         for (int i = 0; i < wheelSize; i++) {
             buckets[i] = new Bucket();
@@ -51,7 +47,7 @@ public class TimeWheel {
         if (overflowWheel == null) {
             synchronized (this) {
                 if (overflowWheel == null) {
-                    overflowWheel = new TimeWheel(interval, wheelSize, currentTimestamp, delayQueue, taskCounter);
+                    overflowWheel = new TimeWheel(interval, wheelSize, currentTimestamp, delayQueue);
                 }
             }
         }
