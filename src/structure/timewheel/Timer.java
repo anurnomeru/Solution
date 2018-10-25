@@ -1,7 +1,6 @@
 package structure.timewheel;
 
 import java.util.Random;
-import java.util.TimerTask;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,52 +14,31 @@ public class Timer {
 
     public static Random random = new Random();
 
+    /**
+     * 模拟添加六百万个任务
+     */
     public static void main(String[] args) {
-        java.util.Timer timer = new java.util.Timer();
-
-        AtomicLong taskCounter = new AtomicLong(0);
-        long start = System.currentTimeMillis();
-
+        Timer timer = new Timer();
         for (int i = 0; i < 6000000; i++) {
+            timer.taskCounter.incrementAndGet();
             long ms = random.nextInt(60000);
-            taskCounter.incrementAndGet();
-            timer.schedule(new TimerTask() {
-
-                @Override
-                public void run() {
+            timer.addTask(new TimedTask(
+                ms
+                ,
+                () -> {
                     System.out.println("延迟任务消费：" + ms);
-                    taskCounter.decrementAndGet();
-                }
-            }, i);
+                    timer.taskCounter.decrementAndGet();
+                }));
         }
 
-        while (taskCounter.get() == 0) {
-            System.out.println("耗时" + (System.currentTimeMillis() - start));
-            break;
+        long start = System.currentTimeMillis();
+        while (true) {
+            timer.advanceClock(20);
+            if (timer.taskCounter.get() == 0L) {
+                System.out.println("耗时" + (System.currentTimeMillis() - start));
+                break;
+            }
         }
-
-        // Timer timer = new Timer();
-        //
-        // for (int i = 0; i < 6000000; i++) {
-        //     timer.taskCounter.incrementAndGet();
-        //     long ms = random.nextInt(60000);
-        //     timer.addTask(new TimedTask(
-        //         ms
-        //         ,
-        //         () -> {
-        //             System.out.println("延迟任务消费：" + ms);
-        //             timer.taskCounter.decrementAndGet();
-        //         }));
-        // }
-        //
-        // long start = System.currentTimeMillis();
-        // while (true) {
-        //     timer.advanceClock(20);
-        //     if (timer.taskCounter.get() == 0L) {
-        //         System.out.println("耗时" + (System.currentTimeMillis() - start));
-        //         break;
-        //     }
-        // }
     }
 
     /** 计数 */
@@ -95,13 +73,9 @@ public class Timer {
      */
     public void advanceClock(long timeout) {
         try {
-            // System.out.println(this.getClass() + "：进行 poll 操作");
             Bucket bucket = delayQueue.poll(timeout, TimeUnit.MILLISECONDS);
-            // System.out.println(this.getClass() + "：poll 成功，获取到：" + (bucket == null ? "null" : bucket.toString()));
             if (bucket != null) {
-                // System.out.println(this.getClass() + "：推动时间轮前进！");
                 timeWheel.advanceClock(bucket.getExpire());
-                // System.out.println(this.getClass() + "：重新将bucket内容分配到新的时间轮，并且执行已经过期的任务！");
                 bucket.flush(this::addTask);
             }
         } catch (Exception e) {

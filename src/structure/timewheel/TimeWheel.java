@@ -69,9 +69,7 @@ public class TimeWheel {
                 int bucketIndex = (int) (((delayMs + currentTimestamp) / tickMs) % wheelSize);
 
                 Bucket bucket = buckets[bucketIndex];
-
                 bucket.addTask(timedTask);
-
                 if (bucket.setExpire(delayMs + currentTimestamp - (delayMs + currentTimestamp) % tickMs)) {
                     delayQueue.offer(bucket);
                 }
