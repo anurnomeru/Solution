@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/10/17
@@ -44,8 +45,12 @@ public class Timer {
      * 新建一个Timer，同时新建一个时间轮
      */
     public Timer() {
-        workerThreadPool = Executors.newFixedThreadPool(1);
-        bossThreadPool = Executors.newFixedThreadPool(1);
+        workerThreadPool = Executors.newFixedThreadPool(1, new ThreadFactoryBuilder().setPriority(10)
+                                                                                     .setNameFormat("TimeWheelWorker")
+                                                                                     .build());
+        bossThreadPool = Executors.newFixedThreadPool(1, new ThreadFactoryBuilder().setPriority(10)
+                                                                                   .setNameFormat("TimeWheelBoss")
+                                                                                   .build());
         timeWheel = new TimeWheel(20, 10, System.currentTimeMillis(), delayQueue);
 
         bossThreadPool.execute(() -> {

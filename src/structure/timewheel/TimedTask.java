@@ -1,7 +1,7 @@
 package structure.timewheel;
 
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
+
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
  *
@@ -50,8 +50,8 @@ public class TimedTask {
 
     @Override
     public String toString() {
-        return "TimedTask{" +
-            " from clazz = " + fromClazz.getSimpleName() +
+        return "TimedTask {" +
+            "from class = " + fromClazz.getSimpleName() +
             ", delay ms = " + delayMs +
             ", expire in = " + new Date(expireTimestamp).toString() +
             '}';
