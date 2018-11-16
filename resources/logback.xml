@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+
+    <property name="STDOUT_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %easyHighlight(%5.5level) %magenta(%pid) --- [%15.15thread] %cyan(%-40.40logger{39} [%4.4line]) : %msg%n"/>
+    <property name="FILE_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5.5level %pid --- [%15.15thread] %-40.40logger{40} [%4.4line] : %msg%n"/>
+    <property name="LOGGINE_FILE_HOME" value="log"/>
+
+    <appender name="STDOUT"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <encoder
+                class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="log.EasyPatternLayout">
+                <pattern>
+                    ${logging.console.pattern:-${STDOUT_PATTERN}}
+                </pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <appender name="FILE_VIEW"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logging.file.path:-${LOGGINE_FILE_HOME}}/${logging.file.name:-easy}-view.log
+        </file>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logging.file.name:-easy}-view-%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <maxFileSize>${logging.file.max.size:-100MB}</maxFileSize>
+            <maxHistory>${logging.file.max.history:-60}</maxHistory>
+            <totalSizeCap>${logging.file.total.size,cap:-20GB}</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder
+                class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="log.EasyPatternLayout">
+                <pattern>
+                    ${logging.console.pattern:-${STDOUT_PATTERN}}
+                </pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+
+    <appender name="FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logging.file.path:-${LOGGINE_FILE_HOME}}/${logging.file.name:-easy}.log
+        </file>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logging.file.name:-easy}-%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <maxFileSize>${logging.file.max.size:-100MB}</maxFileSize>
+            <maxHistory>${logging.file.max.history:-60}</maxHistory>
+            <totalSizeCap>${logging.file.total.size,cap:-20GB}</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder
+                class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="log.EasyPatternLayout">
+                <pattern>
+                    ${logging.file.pattern:-${FILE_PATTERN}}
+                </pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <appender name="FILE_ERROR_VIEW"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logging.file.path:-${LOGGINE_FILE_HOME}}/${logging.file.name:-easy}-error-view.log
+        </file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logging.file.name:-easy}-error-view-%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <maxFileSize>${logging.file.max.size:-100MB}</maxFileSize>
+            <maxHistory>${logging.file.max.history:-60}</maxHistory>
+            <totalSizeCap>${logging.file.total.size,cap:-20GB}</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder
+                class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="log.EasyPatternLayout">
+                <pattern>
+                    ${logging.console.pattern:-${STDOUT_PATTERN}}
+                </pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <appender name="FILE_ERROR"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logging.file.path:-${LOGGINE_FILE_HOME}}/${logging.file.name:-easy}-error.log
+        </file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logging.file.name:-easy}-error-%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <maxFileSize>${logging.file.max.size:-100MB}</maxFileSize>
+            <maxHistory>${logging.file.max.history:-60}</maxHistory>
+            <totalSizeCap>${logging.file.total.size,cap:-20GB}</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder
+                class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="log.EasyPatternLayout">
+                <pattern>
+                    ${logging.file.pattern:-${FILE_PATTERN}}
+                </pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+
+    <root level="${logging.level:-info}">
+        <appender-ref ref="STDOUT"/>
+        <!--<appender-ref ref="FILE"/>-->
+        <!--<appender-ref ref="FILE_VIEW"/>-->
+        <!--<appender-ref ref="FILE_ERROR"/>-->
+        <!--<appender-ref ref="FILE_ERROR_VIEW"/>-->
+    </root>
+
+</configuration>

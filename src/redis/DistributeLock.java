@@ -1,6 +1,7 @@
 package redis;
 
 import redis.clients.jedis.Jedis;
+import structure.timewheel.TimedTask;
 import structure.timewheel.Timer;
 
 /**
@@ -18,6 +19,7 @@ public class DistributeLock {
         Jedis jedis = new Jedis("localhost");
         DistributeLock distributeLock = new DistributeLock(jedis);
 
+        TIMER.addTask(new TimedTask(1000, () -> System.out.println("lalala"), DistributeLock.class));
 
         // distributeLock.tryLock("this", 1000);
     }

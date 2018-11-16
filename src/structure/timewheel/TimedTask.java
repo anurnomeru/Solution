@@ -1,5 +1,7 @@
 package structure.timewheel;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
  *
@@ -7,11 +9,13 @@ package structure.timewheel;
  */
 public class TimedTask {
 
+    private Class<?> fromClazz;
+
     /** 延迟多久执行时间 */
     private long delayMs;
 
     /** 过期时间戳 */
-    private long expireTiemstamp;
+    private long expireTimestamp;
 
     /** 任务 */
     private Runnable task;
@@ -22,13 +26,14 @@ public class TimedTask {
 
     protected TimedTask pre;
 
-    public TimedTask(long delayMs, Runnable task) {
+    public TimedTask(long delayMs, Runnable task, Class<?> fromClazz) {
+        this.fromClazz = fromClazz;
         this.delayMs = delayMs;
         this.task = task;
         this.bucket = null;
         this.next = null;
         this.pre = null;
-        this.expireTiemstamp = System.currentTimeMillis() + delayMs;
+        this.expireTimestamp = System.currentTimeMillis() + delayMs;
     }
 
     public Runnable getTask() {
@@ -40,6 +45,15 @@ public class TimedTask {
     }
 
     public long getExpireTimestamp() {
-        return expireTiemstamp;
+        return expireTimestamp;
+    }
+
+    @Override
+    public String toString() {
+        return "TimedTask{" +
+            " from clazz = " + fromClazz.getSimpleName() +
+            ", delay ms = " + delayMs +
+            ", expire in = " + new Date(expireTimestamp).toString() +
+            '}';
     }
 }

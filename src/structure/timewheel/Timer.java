@@ -4,11 +4,15 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/10/17
  */
 public class Timer {
+
+    private static Logger log = LoggerFactory.getLogger(Timer.class);
 
     /** 最底层的那个时间轮 */
     private TimeWheel timeWheel;
@@ -27,7 +31,9 @@ public class Timer {
         if (INSTANCE == null) {
             synchronized (Timer.class) {
                 if (INSTANCE == null) {
+                    log.info("initial Timer");
                     INSTANCE = new Timer();
+                    log.info("Timer initial complete");
                 }
             }
         }
@@ -52,8 +58,9 @@ public class Timer {
     /**
      * 将任务添加到时间轮
      */
-    private void addTask(TimedTask timedTask) {
+    public void addTask(TimedTask timedTask) {
         if (!timeWheel.addTask(timedTask)) {
+            log.info("submit task: " + timedTask.toString());
             workerThreadPool.submit(timedTask.getTask());
         }
     }
