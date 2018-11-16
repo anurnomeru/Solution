@@ -40,8 +40,6 @@ public class Bucket implements Delayed {
 
     /**
      * 新增任务到bucket
-     *
-     * todo 待看
      */
     public void addTask(TimedTask timedTask) {
         synchronized (timedTask) {

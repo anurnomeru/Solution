@@ -16,11 +16,11 @@ public class TimedTask {
     /** 任务 */
     private Runnable task;
 
-    public Bucket bucket;
+    protected Bucket bucket;
 
-    public TimedTask next;
+    protected TimedTask next;
 
-    public TimedTask pre;
+    protected TimedTask pre;
 
     public TimedTask(long delayMs, Runnable task) {
         this.delayMs = delayMs;
