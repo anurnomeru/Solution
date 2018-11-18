@@ -17,9 +17,11 @@ public class DistributeLock {
     public static void main(String[] args) throws InterruptedException {
         Jedis jedis = new Jedis("localhost");
         DistributeLock distributeLock = new DistributeLock("locking", jedis);
-        distributeLock.tryLock(10000L,100L);
-
-        Thread.sleep(10000L);
+        distributeLock.unLock();
+        distributeLock.tryLock(1000L, 100L);
+        distributeLock.tryLock(1000L, 100L);
+        distributeLock.tryLock(1000L, 100L);
+        Thread.sleep(9999L);
         distributeLock.unLock();
     }
 
@@ -41,6 +43,8 @@ public class DistributeLock {
 
     private WriteLock writeLock;
 
+    private volatile boolean locked;
+
     public DistributeLock(String key, Jedis jedis) {
         TIMER = Timer.getInstance();
         this.key = key;
@@ -55,12 +59,22 @@ public class DistributeLock {
         leaseMs = leaseMs != null ? leaseMs : DEFAULT_LEASE;
 
         long startMs = System.currentTimeMillis();
+        if (locked) {
+            return true;
+        }
         if (this.doLeaseLock(leaseMs)) {
-            log.info("lease the lock of key {} success.", key);
+            log.info("lease the lock of key [{}] success.", key);
             renew(leaseMs);
+
+            try {
+                writeLock.lock();
+                locked = true;
+            } finally {
+                writeLock.unlock();
+            }
             return true;
         } else {
-            log.info("lease the lock of key {} fail.", key);
+            log.info("lease the lock of key [{}] fail.", key);
             try {
                 Thread.sleep(TRY_LOCK_INTERVAL);
             } catch (InterruptedException ignore) {
@@ -72,8 +86,11 @@ public class DistributeLock {
     private void unLock() {
         try {
             writeLock.lock();
-            renewTask.cancle();
-            this.doReleaseLock();
+            if (locked) {
+                renewTask.cancle();
+                this.doReleaseLock();
+                locked = false;
+            }
         } finally {
             writeLock.unlock();
         }
@@ -89,7 +106,9 @@ public class DistributeLock {
                 renewTask = new TimedTask(leaseMs / 2, () -> {
                     try {
                         readLock.lock();
-                        this.doRenew(leaseMs);
+                        if (locked) {
+                            this.doRenew(leaseMs);
+                        }
                     } finally {
                         readLock.unlock();
                     }
@@ -106,7 +125,7 @@ public class DistributeLock {
      * 尝试获得一个锁
      */
     private boolean doLeaseLock(long leaseMs) {
-        log.info("try to lease the key {} {}ms", key, leaseMs);
+        log.info("try to lease the key [{}] [{}]ms", key, leaseMs);
         return jedis.set(key, key, "nx", "ex", leaseMs) != null;
     }
 
@@ -114,7 +133,7 @@ public class DistributeLock {
      * 释放一个锁
      */
     private boolean doReleaseLock() {
-        log.info("release the key {}", key);
+        log.info("release the key [{}]", key);
         return jedis.del(key) != 0L;
     }
 
@@ -122,7 +141,7 @@ public class DistributeLock {
      * +1s
      */
     private boolean doRenew(long renewMs) {
-        log.info("renew the lease of key {} {}ms", key, renewMs);
+        log.info("renew the lease of key [{}] [{}]ms", key, renewMs);
         return jedis.set(key, key, "xx", "ex", renewMs) != null;
     }
 }
