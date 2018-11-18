@@ -26,8 +26,9 @@ public class TimedTask {
 
     protected TimedTask pre;
 
-    public TimedTask(long delayMs, Runnable task, Class<?> fromClazz) {
-        this.fromClazz = fromClazz;
+    public String desc;
+
+    public TimedTask(long delayMs, Runnable task) {
         this.delayMs = delayMs;
         this.task = task;
         this.bucket = null;
@@ -50,10 +51,6 @@ public class TimedTask {
 
     @Override
     public String toString() {
-        return "TimedTask {" +
-            "from class = " + fromClazz.getSimpleName() +
-            ", delay ms = " + delayMs +
-            ", expire in = " + new Date(expireTimestamp).toString() +
-            '}';
+        return desc;
     }
 }

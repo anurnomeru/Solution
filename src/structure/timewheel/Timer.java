@@ -4,8 +4,9 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.atomic.AtomicLong;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
@@ -13,7 +14,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
  */
 public class Timer {
 
-    private static Logger log = LoggerFactory.getLogger(Timer.class);
+    private Logger log = LogManager.getLogger();
 
     /** 最底层的那个时间轮 */
     private TimeWheel timeWheel;
@@ -28,13 +29,13 @@ public class Timer {
 
     private static Timer INSTANCE;
 
+    private AtomicLong consumeCounter = new AtomicLong(0);
+
     public static Timer getInstance() {
         if (INSTANCE == null) {
             synchronized (Timer.class) {
                 if (INSTANCE == null) {
-                    log.info("initial Timer");
                     INSTANCE = new Timer();
-                    log.info("Timer initial complete");
                 }
             }
         }
@@ -45,9 +46,9 @@ public class Timer {
      * 新建一个Timer，同时新建一个时间轮
      */
     public Timer() {
-        workerThreadPool = Executors.newFixedThreadPool(1, new ThreadFactoryBuilder().setPriority(10)
-                                                                                     .setNameFormat("TimeWheelWorker")
-                                                                                     .build());
+        workerThreadPool = Executors.newFixedThreadPool(100, new ThreadFactoryBuilder().setPriority(10)
+                                                                                       .setNameFormat("TimeWheelWorker")
+                                                                                       .build());
         bossThreadPool = Executors.newFixedThreadPool(1, new ThreadFactoryBuilder().setPriority(10)
                                                                                    .setNameFormat("TimeWheelBoss")
                                                                                    .build());
@@ -65,7 +66,6 @@ public class Timer {
      */
     public void addTask(TimedTask timedTask) {
         if (!timeWheel.addTask(timedTask)) {
-            log.info("submit task: " + timedTask.toString());
             workerThreadPool.submit(timedTask.getTask());
         }
     }

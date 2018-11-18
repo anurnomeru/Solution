@@ -17,7 +17,7 @@ public class Bucket implements Delayed {
     private AtomicLong expiration = new AtomicLong(-1L);
 
     /** 根节点 */
-    private TimedTask root = new TimedTask(-1L, null, Delayed.class);
+    private TimedTask root = new TimedTask(-1L, null);
 
     {
         root.pre = root;
