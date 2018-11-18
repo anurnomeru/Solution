@@ -66,7 +66,9 @@ public class Timer {
      */
     public void addTask(TimedTask timedTask) {
         if (!timeWheel.addTask(timedTask)) {
-            workerThreadPool.submit(timedTask.getTask());
+            if (!timedTask.isCancle()) {
+                workerThreadPool.submit(timedTask.getTask());
+            }
         }
     }
 

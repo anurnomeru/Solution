@@ -1,7 +1,5 @@
 package structure.timewheel;
 
-import java.util.Date;
-
 /**
  * Created by Anur IjuoKaruKas on 2018/10/16
  *
@@ -20,6 +18,9 @@ public class TimedTask {
     /** 任务 */
     private Runnable task;
 
+    /** 是否取消 */
+    private volatile boolean cancle;
+
     protected Bucket bucket;
 
     protected TimedTask next;
@@ -35,6 +36,15 @@ public class TimedTask {
         this.next = null;
         this.pre = null;
         this.expireTimestamp = System.currentTimeMillis() + delayMs;
+        this.cancle = false;
+    }
+
+    public void cancle() {
+        cancle = true;
+    }
+
+    public boolean isCancle() {
+        return cancle;
     }
 
     public Runnable getTask() {
