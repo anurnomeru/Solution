@@ -24,7 +24,8 @@ public class TestZkClientGetData {
         customGetChildrenWatcher.setStat(stat);
         customGetChildrenWatcher.await();
 
-        zooKeeper.getData("/sanguo", true, stat);
+        zooKeeper.addAuthInfo("digest", "foo:true".getBytes());
+        zooKeeper.getData("/sanguo111", true, stat);
 
         Thread.sleep(10000000);
     }
