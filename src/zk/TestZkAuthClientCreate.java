@@ -13,8 +13,8 @@ import zk.common.CustomWatcher;
 public class TestZkAuthClientCreate {
 
     public static void main(String[] args) throws IOException, KeeperException, InterruptedException {
-        //        createSync();
-        createAsync();
+        createSync();
+        //        createAsync();
     }
 
     public static void createSync() throws IOException, InterruptedException, KeeperException {
@@ -22,11 +22,15 @@ public class TestZkAuthClientCreate {
         ZooKeeper zooKeeper = new ZooKeeper(Constant.CONNECT_STR, 5000, customWatcher);
         customWatcher.await();
 
-        String path1 = zooKeeper.create("/sanguo", "luoguanzhong".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+        zooKeeper.addAuthInfo("digest", "foo:true".getBytes());
+
+        String path1 = zooKeeper.create("/sanguo", "luoguanzhong".getBytes(), Ids.CREATOR_ALL_ACL, CreateMode.PERSISTENT);
         System.out.println("Create path " + path1);
 
-        String path2 = zooKeeper.create("/sanguoz", "luoguanzhong".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+        String path2 = zooKeeper.create("/sanguo/wu", "luoguanzhong".getBytes(), Ids.CREATOR_ALL_ACL, CreateMode.EPHEMERAL);
         System.out.println("Create path " + path2);
+
+        Thread.sleep(100000);
     }
 
     public static void createAsync() throws IOException, InterruptedException, KeeperException {
@@ -39,6 +43,8 @@ public class TestZkAuthClientCreate {
 
         zooKeeper.create("/sanguo", "luoguanzhong".getBytes(), Ids.CREATOR_ALL_ACL, CreateMode.EPHEMERAL,
             (i, s, o, s1) -> System.out.println(String.format("create path async rc = %s, path = %s, ctx = %s, real path = %s", i, s, o, s1)), "This is context");
+
+        Thread.sleep(1000);
 
         zooKeeper.create("/sanguo/wu", "luoguanzhong".getBytes(), Ids.CREATOR_ALL_ACL, CreateMode.EPHEMERAL,
             (i, s, o, s1) -> System.out.println(String.format("create path async rc = %s, path = %s, ctx = %s, real path = %s", i, s, o, s1)), "This is context");
