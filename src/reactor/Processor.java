@@ -7,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -18,9 +19,15 @@ public class Processor implements Runnable {
 
     private Selector selector;
 
-    public Processor() throws IOException {
+    private ArrayBlockingQueue<Request> requestQueue;
+
+    private ArrayBlockingQueue<Response> responseQueue;
+
+    public Processor(ArrayBlockingQueue<Request> requestQueue, ArrayBlockingQueue<Response> responseQueue) throws IOException {
         this.newConnection = new ConcurrentLinkedQueue<>();
         this.selector = Selector.open();
+        this.requestQueue = requestQueue;
+        this.responseQueue = responseQueue;
     }
 
     @Override
@@ -40,12 +47,14 @@ public class Processor implements Runnable {
                 }
             }
 
-            //            /*
-            //             * 处理新应答
-            //             */
-            //            while (true) {
-            //
-            //            }
+
+            /*
+             * 处理新应答
+             */
+            responseQueue.poll()
+            while (true) {
+
+            }
 
             /*
              * 处理新请求 && 新应答
@@ -69,7 +78,7 @@ public class Processor implements Runnable {
                             e.printStackTrace();
                         }
 
-                        // todo 处理一下byteBuffer
+                        requestQueue.add(new Request(socketChannel, byteBuffer));// 接受完数据后，把数据丢进队列
                     }
                 }
             }
