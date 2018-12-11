@@ -40,20 +40,21 @@ public class Processor implements Runnable {
             while (!newConnection.isEmpty()) {
                 SocketChannel socketChannel = newConnection.poll();
                 try {
-                    SelectionKey selectionKey = socketChannel.register(selector, SelectionKey.OP_READ);
-                    selectionKey.attach(socketChannel);
+                    socketChannel.register(selector, SelectionKey.OP_READ);
                 } catch (ClosedChannelException e) {
                     e.printStackTrace();
                 }
             }
 
-
             /*
              * 处理新应答
              */
-            responseQueue.poll()
-            while (true) {
-
+            Response response = responseQueue.poll();
+            while (response != null) {
+                SelectionKey key = response.getSelectionKey();
+                key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+                key.attach(response.getByteBuffer());
+                response = responseQueue.poll();
             }
 
             /*

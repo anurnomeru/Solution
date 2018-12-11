@@ -1,18 +1,26 @@
 package reactor;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.SelectionKey;
 /**
  * Created by Anur IjuoKaruKas on 2018/12/11
  */
 public class Response {
 
-    private SocketChannel socketChannel;
+    private SelectionKey selectionKey;
 
     private ByteBuffer byteBuffer;
 
-    public Response(SocketChannel socketChannel, ByteBuffer byteBuffer) {
-        this.socketChannel = socketChannel;
+    public SelectionKey getSelectionKey() {
+        return selectionKey;
+    }
+
+    public ByteBuffer getByteBuffer() {
+        return byteBuffer;
+    }
+
+    public Response(SelectionKey selectionKey, ByteBuffer byteBuffer) {
+        this.selectionKey = selectionKey;
         this.byteBuffer = byteBuffer;
     }
 }
