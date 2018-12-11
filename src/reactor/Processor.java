@@ -1,6 +1,7 @@
 package reactor;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -39,15 +40,17 @@ public class Processor implements Runnable {
                 }
             }
 
+            //            /*
+            //             * 处理新应答
+            //             */
+            //            while (true) {
+            //
+            //            }
+
             /*
-             * 处理新应答
+             * 处理新请求 && 新应答
              */
-            while (true) {
-
-            }
-
-            // readyKeys 已经准备好了的 SelectionKey 的数量
-            int ready = 0;
+            int ready = 0; // 半秒轮询一次
             try {
                 ready = selector.select(500);
             } catch (IOException e) {
@@ -58,16 +61,17 @@ public class Processor implements Runnable {
                 Set<SelectionKey> selectionKeys = selector.selectedKeys();
                 for (SelectionKey selectionKey : selectionKeys) {
                     if (selectionKey.isReadable()) {
+                        SocketChannel socketChannel = ((SocketChannel) selectionKey.attachment());
+                        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);// 懒得定协议，就默认取这么多吧 = =
+                        try {
+                            socketChannel.read(byteBuffer);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
 
+                        // todo 处理一下byteBuffer
                     }
                 }
-            }
-
-            /*
-             * 处理新应答
-             */
-            while (true) {
-
             }
         }
     }
