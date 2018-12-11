@@ -3,9 +3,11 @@ package reactor;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -59,7 +61,14 @@ public class Acceptor implements Runnable {
         }
     }
 
-    public void accept(SelectionKey selectionKey, Processor processor) {
-
+    public void accept(SelectionKey selectionKey, Processor processor) throws IOException {
+        SelectableChannel channel = selectionKey.channel();
+        SocketChannel socketChannel = ((ServerSocketChannel) channel).accept();
+        socketChannel.configureBlocking(false);
+        socketChannel.socket()
+                     .setTcpNoDelay(true);
+        socketChannel.socket()
+                     .setKeepAlive(true);
+        processor.accept(socketChannel);
     }
 }
