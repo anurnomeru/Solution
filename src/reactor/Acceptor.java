@@ -8,7 +8,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -41,23 +40,24 @@ public class Acceptor implements Runnable {
             e.printStackTrace();
         }
 
-        try {
-            int currentProcessors = 0;
-
-            int ready = selector.select(500); // 半秒轮询一次
-            if (ready > 0) {
-                Set<SelectionKey> selectionKeys = selector.selectedKeys();
-                for (SelectionKey selectionKey : selectionKeys) {
-                    if (selectionKey.isAcceptable()) {
-                        this.accept(selectionKey, processors[currentProcessors]);
-                        currentProcessors = (currentProcessors + 1) % processors.length;
-                    } else {
-                        throw new RuntimeException("不应该出现的情况，因为只订阅了OP_ACCEPT");
+        int currentProcessors = 0;
+        while (true){
+            try {
+                int ready = selector.select(500); // 半秒轮询一次
+                if (ready > 0) {
+                    Set<SelectionKey> selectionKeys = selector.selectedKeys();
+                    for (SelectionKey selectionKey : selectionKeys) {
+                        if (selectionKey.isAcceptable()) {
+                            this.accept(selectionKey, processors[currentProcessors]);
+                            currentProcessors = (currentProcessors + 1) % processors.length;
+                        } else {
+                            throw new RuntimeException("不应该出现的情况，因为只订阅了OP_ACCEPT");
+                        }
                     }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -69,6 +69,9 @@ public class Acceptor implements Runnable {
                      .setTcpNoDelay(true);
         socketChannel.socket()
                      .setKeepAlive(true);
+
+
+        // 将需要连接的socketChannel转交给processor去处理
         processor.accept(socketChannel);
     }
 }
