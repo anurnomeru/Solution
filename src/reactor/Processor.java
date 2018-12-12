@@ -57,9 +57,6 @@ public class Processor implements Runnable {
                 response = responseQueue.poll();
             }
 
-            /*
-             * 处理新请求 && 新应答
-             */
             int ready = 0; // 半秒轮询一次
             try {
                 ready = selector.select(500);
@@ -70,23 +67,40 @@ public class Processor implements Runnable {
             if (ready > 0) {
                 Set<SelectionKey> selectionKeys = selector.selectedKeys();
                 for (SelectionKey selectionKey : selectionKeys) {
+
+                    /*
+                     * 处理新请求
+                     */
                     if (selectionKey.isReadable()) {
-                        SocketChannel socketChannel = ((SocketChannel) selectionKey.attachment());
+                        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
                         ByteBuffer byteBuffer = ByteBuffer.allocate(1024);// 懒得定协议，就默认取这么多吧 = =
                         try {
                             socketChannel.read(byteBuffer);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-
                         requestQueue.add(new Request(socketChannel, byteBuffer));// 接受完数据后，把数据丢进队列
+                    }
+
+                    /*
+                     * 处理新应答
+                     */
+                    if (selectionKey.isWritable()) {
+                        ByteBuffer send = (ByteBuffer) selectionKey.attachment();
+                        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+                        try {
+                            socketChannel.write(send);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
                     }
                 }
             }
         }
     }
 
-    public void accept(SocketChannel socketChannel) {
+    protected void accept(SocketChannel socketChannel) {
         newConnection.add(socketChannel);
         // 还需要wakeUp，如果轮询阻塞了，告诉它可以不阻塞了
         selector.wakeup();
