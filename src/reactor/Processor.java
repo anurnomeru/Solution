@@ -79,7 +79,7 @@ public class Processor implements Runnable {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        requestQueue.add(new Request(socketChannel, byteBuffer));// 接受完数据后，把数据丢进队列
+                        requestQueue.add(new Request(selectionKey, byteBuffer));// 接受完数据后，把数据丢进队列
                     }
 
                     /*
@@ -94,6 +94,7 @@ public class Processor implements Runnable {
                             e.printStackTrace();
                         }
                         selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
+                        selectionKey.attach(null);
                     }
                 }
             }

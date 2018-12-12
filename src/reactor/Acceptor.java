@@ -32,8 +32,15 @@ public class Acceptor implements Runnable {
         this.processors = processors;
     }
 
+    boolean init = true;
+
     @Override
     public void run() {
+        if (init) {
+            System.out.println("已可以开始接客");
+            init = false;
+        }
+
         try {
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         } catch (ClosedChannelException e) {
@@ -41,7 +48,7 @@ public class Acceptor implements Runnable {
         }
 
         int currentProcessors = 0;
-        while (true){
+        while (true) {
             try {
                 int ready = selector.select(500); // 半秒轮询一次
                 if (ready > 0) {
@@ -69,7 +76,6 @@ public class Acceptor implements Runnable {
                      .setTcpNoDelay(true);
         socketChannel.socket()
                      .setKeepAlive(true);
-
 
         // 将需要连接的socketChannel转交给processor去处理
         processor.accept(socketChannel);
