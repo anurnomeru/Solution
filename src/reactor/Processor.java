@@ -79,6 +79,7 @@ public class Processor implements Runnable {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        byteBuffer.flip();
                         requestQueue.add(new Request(selectionKey, byteBuffer));// 接受完数据后，把数据丢进队列
                     }
 

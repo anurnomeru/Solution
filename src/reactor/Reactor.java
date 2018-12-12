@@ -2,6 +2,10 @@ package reactor;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,14 +15,17 @@ import java.util.concurrent.Executors;
  */
 public class Reactor {
 
+    public static final int PORT = 9999;
+
     public static void main(String[] args) throws IOException {
         ArrayBlockingQueue<Request> requestQueue = new ArrayBlockingQueue<>(100);
         ArrayBlockingQueue<Response> responseQueue = new ArrayBlockingQueue<>(100);
         Processor processor = new Processor(requestQueue, responseQueue);
 
-        Acceptor acceptor = new Acceptor(new InetSocketAddress(9999), new Processor[] {processor});
+        Acceptor acceptor = new Acceptor(new InetSocketAddress(PORT), new Processor[] {processor});
 
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
-        executorService.submit(acceptor);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        executorService.execute(acceptor);
+        executorService.execute(processor);
     }
 }
