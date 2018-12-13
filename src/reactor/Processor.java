@@ -21,18 +21,15 @@ public class Processor implements Runnable {
 
     private Selector selector;
 
-    private ArrayBlockingQueue<Request> requestQueue;
-
-    private ArrayBlockingQueue<Response> responseQueue;
-
     private Map<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightResponse;
 
-    public Processor(ArrayBlockingQueue<Request> requestQueue, ArrayBlockingQueue<Response> responseQueue) throws IOException {
+    private RequestChannel requestChannel;
+
+    public Processor(RequestChannel requestChannel) throws IOException {
         this.newConnection = new ConcurrentLinkedQueue<>();
         this.selector = Selector.open();
-        this.requestQueue = requestQueue;
-        this.responseQueue = responseQueue;
         this.inFlightResponse = new HashMap<>();
+        this.requestChannel = requestChannel;
     }
 
     @Override
@@ -54,7 +51,7 @@ public class Processor implements Runnable {
             /*
              * 处理新应答
              */
-            Response response = responseQueue.poll();
+            Response response = requestChannel.receiveResponse();
             while (response != null) {
                 SelectionKey key = response.getSelectionKey();
                 key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
@@ -66,7 +63,7 @@ public class Processor implements Runnable {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                response = responseQueue.poll();
+                response = requestChannel.receiveResponse();
             }
 
             int ready = 0; // 半秒轮询一次
@@ -92,7 +89,7 @@ public class Processor implements Runnable {
                             e.printStackTrace();
                         }
                         byteBuffer.flip();
-                        requestQueue.add(new Request(selectionKey, byteBuffer));// 接受完数据后，把数据丢进队列
+                        requestChannel.sendRequest(new Request(selectionKey, byteBuffer));// 接受完数据后，把数据丢进队列
                         selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_READ);// 不再关注read
                     }
 

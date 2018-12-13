@@ -1,29 +1,28 @@
 package reactor;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.nio.channels.SelectionKey;
+
 /**
  * Created by Anur IjuoKaruKas on 2018/12/12
  */
 public class Handler implements Runnable {
 
-    private ArrayBlockingQueue<Request> requestQueue;
+    private RequestChannel requestChannel;
 
-    private ArrayBlockingQueue<Response> responseQueue;
-
-    public Handler(ArrayBlockingQueue<Request> requestQueue, ArrayBlockingQueue<Response> responseQueue) {
-        this.requestQueue = requestQueue;
-        this.responseQueue = responseQueue;
+    public Handler(RequestChannel requestChannel) {
+        this.requestChannel = requestChannel;
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                Request request = requestQueue.poll();
+                Request request = requestChannel.receiveRequest();
                 if (request != null) {
-                    handler(request);
+                    Thread.sleep(500);        // 模拟业务处理
+                    ByteBuffer byteBuffer = request.getByteBuffer();
+                    handler(request.getSelectionKey(), byteBuffer);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -31,17 +30,30 @@ public class Handler implements Runnable {
         }
     }
 
-    private void handler(Request request) throws InterruptedException {
-        Thread.sleep(500);        // 模拟业务处理
-        ByteBuffer byteBuffer = request.getByteBuffer();
+    public void handler(SelectionKey selectionKey, ByteBuffer byteBuffer) {
         byte[] bytes = byteBuffer.array();
 
-        System.out.println("收到了请求：" + new String(bytes));
+        String msg = new String(bytes);
+        System.out.println("收到了请求：" + msg);
 
-        ByteBuffer response = ByteBuffer.allocate(2048);
-        response.put("This is response".getBytes());
-        response.put(bytes);
-        response.flip();
-        responseQueue.put(new Response(request.getSelectionKey(), response));
+        if (msg.startsWith("Fetch")) {
+            ByteBuffer response = ByteBuffer.allocate(2048);
+            response.put("Fetch ~~~~~~~~~~".getBytes());
+            response.put(bytes);
+            response.flip();
+            requestChannel.sendResponse(new Response(selectionKey, response));
+        } else if (msg.startsWith("Hello")) {
+            ByteBuffer response = ByteBuffer.allocate(2048);
+            response.put("Hi ~~~~~~~~~~".getBytes());
+            response.put(bytes);
+            response.flip();
+            requestChannel.sendResponse(new Response(selectionKey, response));
+        } else {
+            ByteBuffer response = ByteBuffer.allocate(2048);
+            response.put("Woww ~~~~~~~~~~".getBytes());
+            response.put(bytes);
+            response.flip();
+            requestChannel.sendResponse(new Response(selectionKey, response));
+        }
     }
 }
