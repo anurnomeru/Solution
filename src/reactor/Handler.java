@@ -21,7 +21,7 @@ public class Handler implements Runnable {
     public void run() {
         while (true) {
             try {
-                Request request = requestQueue.poll(500, TimeUnit.MILLISECONDS);
+                Request request = requestQueue.poll();
                 if (request != null) {
                     handler(request);
                 }
@@ -32,15 +32,16 @@ public class Handler implements Runnable {
     }
 
     private void handler(Request request) throws InterruptedException {
-        Thread.sleep(1000);        // 模拟业务处理
+        Thread.sleep(500);        // 模拟业务处理
         ByteBuffer byteBuffer = request.getByteBuffer();
         byte[] bytes = byteBuffer.array();
 
-        System.out.println("收到了请求：" + bytes);
+        System.out.println("收到了请求：" + new String(bytes));
 
-        ByteBuffer response = ByteBuffer.allocate(1024);
+        ByteBuffer response = ByteBuffer.allocate(2048);
         response.put("This is response".getBytes());
         response.put(bytes);
+        response.flip();
         responseQueue.put(new Response(request.getSelectionKey(), response));
     }
 }

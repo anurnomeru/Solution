@@ -21,11 +21,12 @@ public class Reactor {
         ArrayBlockingQueue<Request> requestQueue = new ArrayBlockingQueue<>(100);
         ArrayBlockingQueue<Response> responseQueue = new ArrayBlockingQueue<>(100);
         Processor processor = new Processor(requestQueue, responseQueue);
-
         Acceptor acceptor = new Acceptor(new InetSocketAddress(PORT), new Processor[] {processor});
+        Handler handler = new Handler(requestQueue, responseQueue);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
         executorService.execute(acceptor);
         executorService.execute(processor);
+        executorService.execute(handler);
     }
 }

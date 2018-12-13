@@ -6,6 +6,8 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -23,11 +25,14 @@ public class Processor implements Runnable {
 
     private ArrayBlockingQueue<Response> responseQueue;
 
+    private Map<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightResponse;
+
     public Processor(ArrayBlockingQueue<Request> requestQueue, ArrayBlockingQueue<Response> responseQueue) throws IOException {
         this.newConnection = new ConcurrentLinkedQueue<>();
         this.selector = Selector.open();
         this.requestQueue = requestQueue;
         this.responseQueue = responseQueue;
+        this.inFlightResponse = new HashMap<>();
     }
 
     @Override
@@ -53,7 +58,14 @@ public class Processor implements Runnable {
             while (response != null) {
                 SelectionKey key = response.getSelectionKey();
                 key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-                key.attach(response.getByteBuffer());
+
+                ArrayBlockingQueue<ByteBuffer> inFlight = inFlightResponse.getOrDefault(response.getSelectionKey(), new ArrayBlockingQueue<>(100));
+                inFlightResponse.put(response.getSelectionKey(), inFlight);
+                try {
+                    inFlight.put(response.getByteBuffer());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 response = responseQueue.poll();
             }
 
@@ -81,13 +93,15 @@ public class Processor implements Runnable {
                         }
                         byteBuffer.flip();
                         requestQueue.add(new Request(selectionKey, byteBuffer));// 接受完数据后，把数据丢进队列
+                        selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_READ);// 不再关注read
                     }
 
                     /*
                      * 处理新应答
                      */
                     if (selectionKey.isWritable()) {
-                        ByteBuffer send = (ByteBuffer) selectionKey.attachment();
+                        ByteBuffer send = inFlightResponse.get(selectionKey)
+                                                          .poll();
                         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
                         try {
                             socketChannel.write(send);
@@ -95,7 +109,7 @@ public class Processor implements Runnable {
                             e.printStackTrace();
                         }
                         selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
-                        selectionKey.attach(null);
+                        selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_READ);
                     }
                 }
             }
