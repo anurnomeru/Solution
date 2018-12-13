@@ -2,6 +2,7 @@ package reactor;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/12/12
@@ -23,17 +24,22 @@ public class Handler implements Runnable {
             Request request = requestChannel.receiveRequest();
             if (request != null) {
                 System.out.println("接收的请求将由" + name + "进行处理");
-                //                    Thread.sleep(500);        // 模拟业务处理
-                ByteBuffer byteBuffer = request.getByteBuffer();
-                handler(request.getSelectionKey(), byteBuffer);
+                handler(request.getSelectionKey(), request.getByteBuffer());
             }
         }
     }
+
+
 
     public void handler(SelectionKey selectionKey, ByteBuffer byteBuffer) {
         byte[] bytes = byteBuffer.array();
 
         String msg = new String(bytes);
+        try {
+            Thread.sleep(500);        // 模拟业务处理
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         ByteBuffer response;
         if (msg.startsWith("Fetch")) {

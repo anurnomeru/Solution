@@ -22,15 +22,15 @@ public class Processor implements Runnable {
 
     private Selector selector;
 
-    private ConcurrentHashMap<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightResponse;
+    private ConcurrentHashMap<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightRequest;
 
     private RequestChannel requestChannel;
 
-    public Processor(String name, RequestChannel requestChannel, ConcurrentHashMap<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightResponse) throws IOException {
+    public Processor(String name, RequestChannel requestChannel, ConcurrentHashMap<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightRequest) throws IOException {
         this.name = name;
         this.newConnection = new ConcurrentLinkedQueue<>();
         this.selector = Selector.open();
-        this.inFlightResponse = inFlightResponse;
+        this.inFlightRequest = inFlightRequest;
         this.requestChannel = requestChannel;
     }
 
@@ -51,15 +51,15 @@ public class Processor implements Runnable {
             }
 
             /*
-             * 处理新应答
+             * 将新应答放入缓冲队列
              */
             Response response = requestChannel.receiveResponse();
             while (response != null) {
                 SelectionKey key = response.getSelectionKey();
                 key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
 
-                ArrayBlockingQueue<ByteBuffer> inFlight = inFlightResponse.getOrDefault(response.getSelectionKey(), new ArrayBlockingQueue<>(100));
-                inFlightResponse.put(response.getSelectionKey(), inFlight);
+                ArrayBlockingQueue<ByteBuffer> inFlight = inFlightRequest.getOrDefault(response.getSelectionKey(), new ArrayBlockingQueue<>(100));
+                inFlightRequest.put(response.getSelectionKey(), inFlight);
                 try {
                     inFlight.put(response.getByteBuffer());
                 } catch (InterruptedException e) {
@@ -68,51 +68,41 @@ public class Processor implements Runnable {
                 response = requestChannel.receiveResponse();
             }
 
-            int ready = 0; // 半秒轮询一次
             try {
-                ready = selector.select(500);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                int ready = selector.select(500);// 半秒轮询一次
+                if (ready > 0) {
+                    Set<SelectionKey> selectionKeys = selector.selectedKeys();
+                    for (SelectionKey selectionKey : selectionKeys) {
 
-            if (ready > 0) {
-                Set<SelectionKey> selectionKeys = selector.selectedKeys();
-                for (SelectionKey selectionKey : selectionKeys) {
-
-                    /*
-                     * 处理新请求
-                     */
-                    if (selectionKey.isReadable()) {
-                        System.out.println(name + "正在处理新请求");
-                        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-                        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);// 懒得定协议，就默认取这么多吧 = =
-                        try {
-                            socketChannel.read(byteBuffer);
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        /*
+                         * 处理新请求
+                         */
+                        if (selectionKey.isReadable()) {
+                            System.out.println(name + "正在处理新请求");
+                            SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+                            ByteBuffer byteBuffer = ByteBuffer.allocate(1024);// 懒得定协议，就默认取这么多吧 = =
+                            socketChannel.read(byteBuffer);// TODO 划重点
+                            byteBuffer.flip();
+                            requestChannel.sendRequest(new Request(selectionKey, byteBuffer));// 接受完数据后，把数据丢进队列
+                            selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_READ);// 不再关注read
                         }
-                        byteBuffer.flip();
-                        requestChannel.sendRequest(new Request(selectionKey, byteBuffer));// 接受完数据后，把数据丢进队列
-                        selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_READ);// 不再关注read
-                    }
 
-                    /*
-                     * 处理新应答
-                     */
-                    if (selectionKey.isWritable()) {
-                        System.out.println(name + "正在处理新应答");
-                        ByteBuffer send = inFlightResponse.get(selectionKey)
-                                                          .poll();
-                        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-                        try {
+                        /*
+                         * 处理新应答
+                         */
+                        if (selectionKey.isWritable()) {
+                            System.out.println(name + "正在处理新应答");
+                            ByteBuffer send = inFlightRequest.get(selectionKey)// // TODO 划重点
+                                                             .poll();
+                            SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
                             socketChannel.write(send);
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
+                            selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_READ);
                         }
-                        selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
-                        selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_READ);
                     }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

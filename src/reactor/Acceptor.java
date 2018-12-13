@@ -9,6 +9,11 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/12/11
@@ -37,7 +42,7 @@ public class Acceptor implements Runnable {
     @Override
     public void run() {
         if (init) {
-            System.out.println("已可以开始接客");
+            System.out.println("已可以开始建立连接");
             init = false;
         }
 
@@ -68,6 +73,7 @@ public class Acceptor implements Runnable {
         }
     }
 
+    // 建立连接，并且使用RoundRobin分配给一个Processor，也就是负责IO的角色
     public void accept(SelectionKey selectionKey, Processor processor) throws IOException {
         SelectableChannel channel = selectionKey.channel();
         SocketChannel socketChannel = ((ServerSocketChannel) channel).accept();
