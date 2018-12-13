@@ -17,15 +17,11 @@ public class Handler implements Runnable {
     @Override
     public void run() {
         while (true) {
-            try {
-                Request request = requestChannel.receiveRequest();
-                if (request != null) {
-                    Thread.sleep(500);        // 模拟业务处理
-                    ByteBuffer byteBuffer = request.getByteBuffer();
-                    handler(request.getSelectionKey(), byteBuffer);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            Request request = requestChannel.receiveRequest();
+            if (request != null) {
+                //                    Thread.sleep(500);        // 模拟业务处理
+                ByteBuffer byteBuffer = request.getByteBuffer();
+                handler(request.getSelectionKey(), byteBuffer);
             }
         }
     }

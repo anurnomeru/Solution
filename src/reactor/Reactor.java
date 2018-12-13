@@ -15,14 +15,22 @@ public class Reactor {
     public static void main(String[] args) throws IOException {
         RequestChannel requestChannel = new RequestChannel();
 
-        Handler handler = new Handler(requestChannel);
-        Processor processor = new Processor(requestChannel);
-        Acceptor acceptor = new Acceptor(new InetSocketAddress(PORT), new Processor[] {processor});
+        Processor processor1 = new Processor(requestChannel);
+        Processor processor2 = new Processor(requestChannel);
+        Acceptor acceptor = new Acceptor(new InetSocketAddress(PORT), new Processor[] {
+            processor1,
+            processor2
+        });
 
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
-
-        executorService.execute(handler);
-        executorService.execute(processor);
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
         executorService.execute(acceptor);
+
+        executorService.execute(processor1);
+        executorService.execute(processor2);
+
+        Handler handler1 = new Handler(requestChannel);
+        Handler handler2 = new Handler(requestChannel);
+        executorService.execute(handler1);
+        executorService.execute(handler2);
     }
 }

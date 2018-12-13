@@ -17,6 +17,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class Processor implements Runnable {
 
+    private String name;
+
     private ConcurrentLinkedQueue<SocketChannel> newConnection;
 
     private Selector selector;
@@ -25,7 +27,8 @@ public class Processor implements Runnable {
 
     private RequestChannel requestChannel;
 
-    public Processor(RequestChannel requestChannel) throws IOException {
+    public Processor(String name, RequestChannel requestChannel) throws IOException {
+        this.name = name;
         this.newConnection = new ConcurrentLinkedQueue<>();
         this.selector = Selector.open();
         this.inFlightResponse = new HashMap<>();
@@ -81,6 +84,7 @@ public class Processor implements Runnable {
                      * 处理新请求
                      */
                     if (selectionKey.isReadable()) {
+                        System.out.println(name + "正在处理新请求");
                         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
                         ByteBuffer byteBuffer = ByteBuffer.allocate(1024);// 懒得定协议，就默认取这么多吧 = =
                         try {
@@ -97,6 +101,7 @@ public class Processor implements Runnable {
                      * 处理新应答
                      */
                     if (selectionKey.isWritable()) {
+                        System.out.println(name + "正在处理新应答");
                         ByteBuffer send = inFlightResponse.get(selectionKey)
                                                           .poll();
                         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
@@ -114,6 +119,11 @@ public class Processor implements Runnable {
     }
 
     protected void accept(SocketChannel socketChannel) {
+        try {
+            System.out.println(name + "正在与" + socketChannel.getLocalAddress() + "建立连接");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         newConnection.add(socketChannel);
         // 还需要wakeUp，如果轮询阻塞了，告诉它可以不阻塞了
         selector.wakeup();
