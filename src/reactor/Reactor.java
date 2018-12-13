@@ -2,6 +2,10 @@ package reactor;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -14,9 +18,10 @@ public class Reactor {
 
     public static void main(String[] args) throws IOException {
         RequestChannel requestChannel = new RequestChannel();
+        ConcurrentHashMap<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightResponse = new ConcurrentHashMap<>();
 
-        Processor processor1 = new Processor(requestChannel);
-        Processor processor2 = new Processor(requestChannel);
+        Processor processor1 = new Processor("p1", requestChannel, inFlightResponse);
+        Processor processor2 = new Processor("p2", requestChannel, inFlightResponse);
         Acceptor acceptor = new Acceptor(new InetSocketAddress(PORT), new Processor[] {
             processor1,
             processor2
@@ -28,8 +33,8 @@ public class Reactor {
         executorService.execute(processor1);
         executorService.execute(processor2);
 
-        Handler handler1 = new Handler(requestChannel);
-        Handler handler2 = new Handler(requestChannel);
+        Handler handler1 = new Handler("h1", requestChannel);
+        Handler handler2 = new Handler("h2", requestChannel);
         executorService.execute(handler1);
         executorService.execute(handler2);
     }

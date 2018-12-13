@@ -6,10 +6,9 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -23,15 +22,15 @@ public class Processor implements Runnable {
 
     private Selector selector;
 
-    private Map<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightResponse;
+    private ConcurrentHashMap<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightResponse;
 
     private RequestChannel requestChannel;
 
-    public Processor(String name, RequestChannel requestChannel) throws IOException {
+    public Processor(String name, RequestChannel requestChannel, ConcurrentHashMap<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightResponse) throws IOException {
         this.name = name;
         this.newConnection = new ConcurrentLinkedQueue<>();
         this.selector = Selector.open();
-        this.inFlightResponse = new HashMap<>();
+        this.inFlightResponse = inFlightResponse;
         this.requestChannel = requestChannel;
     }
 
