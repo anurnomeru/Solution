@@ -6,6 +6,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,8 +72,11 @@ public class Processor implements Runnable {
             try {
                 int ready = selector.select(500);// 半秒轮询一次
                 if (ready > 0) {
-                    Set<SelectionKey> selectionKeys = selector.selectedKeys();
-                    for (SelectionKey selectionKey : selectionKeys) {
+                    Iterator<SelectionKey> selectionKeys = selector.selectedKeys()
+                                                                   .iterator();
+                    while (selectionKeys.hasNext()) {
+                        SelectionKey selectionKey = selectionKeys.next();
+                        selectionKeys.remove();
 
                         /*
                          * 处理新请求
