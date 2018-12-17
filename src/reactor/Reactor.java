@@ -27,7 +27,7 @@ public class Reactor {
             processor2
         });
 
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        ExecutorService executorService = Executors.newFixedThreadPool(10);// 偷懒就用同一个线程池了
         executorService.execute(acceptor);
 
         executorService.execute(processor1);
