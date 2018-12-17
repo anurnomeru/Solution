@@ -22,7 +22,7 @@ public class Processor implements Runnable {
 
     private Selector selector;
 
-    private ConcurrentHashMap<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightRequest;
+    private ConcurrentHashMap<SelectionKey, ArrayBlockingQueue<ByteBuffer>> inFlightRequest;// 回包缓冲队列
 
     private RequestChannel requestChannel;
 
@@ -109,7 +109,7 @@ public class Processor implements Runnable {
 
     protected void accept(SocketChannel socketChannel) {
         try {
-            System.out.println(name + "正在与" + socketChannel.getLocalAddress() + "建立连接");
+            System.out.println(name + "正在与" + socketChannel.getRemoteAddress() + "建立连接");
         } catch (IOException e) {
             e.printStackTrace();
         }

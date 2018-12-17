@@ -8,12 +8,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/12/11
@@ -37,28 +33,25 @@ public class Acceptor implements Runnable {
         this.processors = processors;
     }
 
-    boolean init = true;
-
     @Override
     public void run() {
-        if (init) {
-            System.out.println("已可以开始建立连接");
-            init = false;
-        }
-
         try {
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         } catch (ClosedChannelException e) {
             e.printStackTrace();
         }
 
+        System.out.println("已可以开始建立连接");
         int currentProcessors = 0;
         while (true) {
             try {
                 int ready = selector.select(500); // 半秒轮询一次
                 if (ready > 0) {
-                    Set<SelectionKey> selectionKeys = selector.selectedKeys();
-                    for (SelectionKey selectionKey : selectionKeys) {
+                    Iterator<SelectionKey> selectionKeys = selector.selectedKeys()
+                                                                   .iterator();
+                    while (selectionKeys.hasNext()) {
+                        SelectionKey selectionKey = selectionKeys.next();
+                        selectionKeys.remove();
                         if (selectionKey.isAcceptable()) {
                             this.accept(selectionKey, processors[currentProcessors]);
                             currentProcessors = (currentProcessors + 1) % processors.length;
