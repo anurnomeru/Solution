@@ -1,10 +1,10 @@
 package simple;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
 /**
  * Created by Anur IjuoKaruKas on 2018/12/14
  * 给定一个密钥字符串S，只包含字母，数字以及 '-'（破折号）。N 个 '-' 将字符串分成了 N+1 组。给定一个数字 K，重新格式化字符串，除了第一个分组以外，每个分组要包含 K 个字符，第一个分组至少要包含 1 个字符。两个分组之间用 '-'（破折号）隔开，并且将所有的小写字母转换为大写字母。
@@ -36,16 +36,17 @@ import java.util.stream.Collectors;
  */
 public class licenseKeyFormatting {
 
-    public static char c = "-".toCharArray()[0];
-
     public static void main(String[] args) {
-        System.out.println(solution("111-222-333", 2));
+        System.out.println(solution("g-3-J", 2));
     }
 
     public static String solution(String s, int k) {
         if (k < 0) {
             throw new RuntimeException();
         }
+        char c = "-".toCharArray()[0];
+
+        s = s.toUpperCase();
 
         char[] chars = s.toCharArray();
         List<Integer> needToRemoveIndex = new ArrayList<>();
@@ -66,9 +67,10 @@ public class licenseKeyFormatting {
 
         int needToAdd = (effectChar - 1) / k;
 
+        int offset = k - (effectChar - (needToAdd * k - 1));
         List<Integer> needToAddIndex = new ArrayList<>();
         for (int i = 1; i <= needToAdd; i++) {
-            needToAddIndex.add(i * k - 1);
+            needToAddIndex.add(i * k - 1 - offset);
         }
 
         if (needToAddIndex.size() == 0) {
@@ -88,11 +90,11 @@ public class licenseKeyFormatting {
         int newCharsLength = newChars.length;
 
         int addCount = 0;
-
+        char c = "-".toCharArray()[0];
         System.arraycopy(chars, 0, newChars, 0, length);
         for (Integer index : indexs) {
             int trueIndex = index + addCount;
-            System.arraycopy(newChars, trueIndex, newChars, trueIndex+1, newCharsLength - trueIndex - 1);
+            System.arraycopy(newChars, trueIndex, newChars, trueIndex + 1, newCharsLength - trueIndex - 1);
             newChars[trueIndex + 1] = c;
             addCount++;
         }
