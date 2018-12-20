@@ -10,6 +10,7 @@ public class DynamicProxy implements InvocationHandler {
 
     public static void main(String[] args) {
         Animal wolf = (Animal) new DynamicProxy().bind(new Wolf());
+        System.getProperties().put("sun.misc.ProxyGenerator.saveGeneratedFiles","true");
         System.out.println(wolf.say());
     }
 
