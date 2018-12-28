@@ -37,7 +37,6 @@ public class Processor implements Runnable {
     @Override
     public void run() {
         while (true) {
-
             /*
              * 处理新链接
              */
