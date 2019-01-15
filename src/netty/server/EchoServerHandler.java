@@ -6,11 +6,17 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.CharsetUtil;
+
 /**
  * Created by Anur IjuoKaruKas on 2019/1/15
  */
 public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 
+    /**
+     * 【2-1】
+     * 它仍需要传入消息返回给发送者，而 write 操作是异步的直到 channelRead 方法返回后可能仍然没有完成（2-1）。
+     * 为此，EchoServerHandler拓展了ChannelInboundHandlerAdapter，其在这个时间点上不会释放消息。
+     */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf in = (ByteBuf) msg;
