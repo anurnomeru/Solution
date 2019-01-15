@@ -7,13 +7,14 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/12/11
+ *
+ * 处理业务分发的核心类
  */
 public class Processor implements Runnable {
 

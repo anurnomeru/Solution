@@ -12,6 +12,8 @@ import java.util.Iterator;
 
 /**
  * Created by Anur IjuoKaruKas on 2018/12/11
+ *
+ * 创建连接的核心类
  */
 public class Acceptor implements Runnable {
 
