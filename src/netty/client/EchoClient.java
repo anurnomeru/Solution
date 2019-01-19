@@ -18,9 +18,7 @@ public class EchoClient {
     private final int port;
 
     public static void main(String[] args) throws Exception {
-        String host = args[0];
-        int port = Integer.parseInt(args[1]);
-        new EchoClient(host, port).start();
+        new EchoClient("localhost", 9876).start();
     }
 
     public EchoClient(String host, int port) {
