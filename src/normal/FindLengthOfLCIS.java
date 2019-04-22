@@ -20,6 +20,12 @@ package normal;
  */
 public class FindLengthOfLCIS {
 
+    public static void main(String[] args) {
+        System.out.println(getMaxLength(new int[] {
+            2,2,2,2,2
+        }));
+    }
+
     public static int getMaxLength(int[] nums) {
         return getMaxLength(nums, 0, 0);
     }
@@ -43,9 +49,8 @@ public class FindLengthOfLCIS {
     }
 
     public static LCISMetaData iter(int[] nums, int startIndex) {
-        int length = 1;
+        int length = 0;
 
-        Integer balance = null;
         Integer current = null;
 
         LCISMetaData lcisMetaData = new LCISMetaData();
@@ -55,23 +60,11 @@ public class FindLengthOfLCIS {
             int temp = nums[i];
 
             if (current != null) {
-
-                if (balance == null) {
-                    balance = temp - current;
-
-                    if (balance <= 0) {
-                        break;
-                    }
-                } else {
-                    if (i == nums.length - 1) {
-                        length++;
-                    }
-                    length++;
-                    if (temp - current != balance) {
-                        break;
-                    }
+                if (temp - current <= 0) {
+                    break;
                 }
             }
+            length++;
 
             current = temp;
         }
