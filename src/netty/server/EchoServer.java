@@ -20,8 +20,7 @@ public class EchoServer {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        int port = Integer.parseInt(args[0]);
-        new EchoServer(port).start();
+        new EchoServer(9876).start();
     }
 
     public void start() throws InterruptedException {
