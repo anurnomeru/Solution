@@ -1,5 +1,6 @@
 package aqs;
 
+import java.util.Date;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 
 /**
@@ -13,14 +14,22 @@ public class Mutex extends AbstractQueuedSynchronizer {
             setState(100); // set the initial state, being unlocked.
         }
 
+        private boolean sign;
+
         @Override
         protected boolean tryAcquire(int ignore) {
-            return compareAndSetState(100, 1);
+            boolean result = false;
+            if (!sign) {
+                sign = true;
+                result =  true;
+            }
+            print("尝试获取锁" + (result ? "成功" : "失败"));
+            return result;
         }
 
         @Override
         protected boolean tryRelease(int ignore) {
-            setState(100);
+            sign = false;
             return true;
         }
     }
@@ -40,14 +49,20 @@ public class Mutex extends AbstractQueuedSynchronizer {
         mutex.lock();
 
         Thread thread = new Thread(() -> {
+            print("调用 mutex.lock() 之前");
             mutex.lock();
-            System.out.println("获取到了锁");
+            print("调用 mutex.lock() 之后");
         });
 
         thread.start();
 
-        System.out.println("SLEEP");
+        print("main 线程 Sleep 之前");
         Thread.sleep(5000);
+        print("main 线程 Sleep 之后");
         mutex.unLock();
+    }
+
+    public static void print(String print) {
+        System.out.println(String.format("时间 - %s\t\t%s\t\t%s", new Date(), Thread.currentThread(), print));
     }
 }
