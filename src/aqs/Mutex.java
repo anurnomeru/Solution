@@ -2,7 +2,7 @@ package aqs;
 
 import java.util.Date;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
-import sun.misc.Unsafe;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Anur IjuoKaruKas on 2019/5/27
@@ -55,6 +55,8 @@ public class Mutex extends AbstractQueuedSynchronizer {
         Thread.sleep(5000);
         print("main 线程 Sleep 之后");
         mutex.unLock();
+
+        new ReentrantLock().lock();
     }
 
     public static void print(String print) {
