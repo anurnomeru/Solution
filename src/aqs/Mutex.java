@@ -41,22 +41,27 @@ public class Mutex extends AbstractQueuedSynchronizer {
 
     public static void main(String[] args) throws InterruptedException {
         Mutex mutex = new Mutex();
+//        mutex.lock();
+//
+//        Thread thread = new Thread(() -> {
+//            print("调用 mutex.lock() 之前");
+//            mutex.lock();
+//            print("调用 mutex.lock() 之后");
+//            mutex.unLock();
+//        });
+//
+//        thread.start();
+//
+//        print("main 线程 Sleep 之前");
+//        Thread.sleep(5000);
+//        print("main 线程 Sleep 之后");
+//        mutex.unLock();
+
         mutex.lock();
+        mutex.lock();
+        System.out.println("重入成功");
 
-        Thread thread = new Thread(() -> {
-            print("调用 mutex.lock() 之前");
-            mutex.lock();
-            print("调用 mutex.lock() 之后");
-        });
-
-        thread.start();
-
-        print("main 线程 Sleep 之前");
-        Thread.sleep(5000);
-        print("main 线程 Sleep 之后");
-        mutex.unLock();
-
-        new ReentrantLock().lock();
+        new ReentrantLock().unlock();
     }
 
     public static void print(String print) {
