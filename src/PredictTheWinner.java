@@ -1,3 +1,5 @@
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 /**
  * Created by Anur IjuoKaruKas on 2018/10/13
  */
@@ -12,6 +14,8 @@ public class PredictTheWinner {
             7,
             5
         }));
+
+        new ReentrantReadWriteLock().readLock().lock();
     }
 
     int[] nums;
