@@ -1,4 +1,3 @@
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -14,6 +13,18 @@ public class Main {
         WriteLock writeLock = l.writeLock();
 
         writeLock.lock();
+        readLock.lock();
+        readLock.lock();
+        writeLock.lock();
+
+        readLock.unlock();
+        writeLock.unlock();
+        readLock.unlock();
+        writeLock.unlock();
+
+        System.out.println("111111");
+
+
 
         Thread t = new Thread(() -> { readLock.lock();System.out.println("A"); });
         t.setName("A");
