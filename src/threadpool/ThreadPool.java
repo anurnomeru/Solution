@@ -1,17 +1,23 @@
 package threadpool;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
-import java.util.concurrent.locks.LockSupport;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import com.google.common.collect.Lists;
 
 /**
  * Created by Anur IjuoKaruKas on 2019/6/19
  */
 public class ThreadPool extends AbstractQueuedSynchronizer {
 
-    private final Queue<Runnable> tasks = new ArrayDeque<>();
+    private final ArrayBlockingQueue<Runnable> tasks;
 
     private final long destroyAfterDoNothing;
 
@@ -19,9 +25,8 @@ public class ThreadPool extends AbstractQueuedSynchronizer {
 
     private final int maxThread;
 
-    private static final long sleepNano = TimeUnit.MILLISECONDS.toNanos(100);
-
-    public ThreadPool(int maxThread, long duration, TimeUnit timeUnit) {
+    public ThreadPool(int maxThread, long duration, TimeUnit timeUnit, int queueSize) {
+        this.tasks = new ArrayBlockingQueue<>(queueSize);
         this.destroyAfterDoNothing = timeUnit.toMillis(duration);
         this.maxThread = maxThread;
 
@@ -29,15 +34,18 @@ public class ThreadPool extends AbstractQueuedSynchronizer {
             long remainMills = this.destroyAfterDoNothing;
             Runnable r;
             for (; ; ) {
-                r = tasks.poll();
-                if (r == null) {
-                    LockSupport.parkNanos(sleepNano);
-                    if ((remainMills -= 100) <= 0) {
-                        break;
+                try {
+                    r = tasks.poll(100, TimeUnit.MILLISECONDS);
+                    if (r == null) {
+                        if ((remainMills -= 100) <= 0) {
+                            break;
+                        }
+                    } else {
+                        remainMills = this.destroyAfterDoNothing;
+                        r.run();
                     }
-                } else {
-                    remainMills = this.destroyAfterDoNothing;
-                    r.run();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
             int state;
@@ -61,7 +69,7 @@ public class ThreadPool extends AbstractQueuedSynchronizer {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        ThreadPool threadPool = new ThreadPool(10, 10, TimeUnit.SECONDS);
+        ThreadPool threadPool = new ThreadPool(10, 10, TimeUnit.SECONDS, 100);
 
         Runnable r = () -> {
         };
