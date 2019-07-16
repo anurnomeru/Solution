@@ -5,11 +5,11 @@ package normal
  */
 class FrogJumping {
 
-    private val cache = mutableMapOf(Pair(1, 1), Pair(2, 2))
+    private val cache = mutableMapOf(Pair(1, 1L), Pair(2, 2L))
 
     @Synchronized
-    fun jumpTo(n: Int): Int {
-        var value = 0
+    fun jumpTo(n: Int): Long {
+        var value = 0L
         if (cache.containsKey(n)) return cache[n]!! else for (i in 1 until n) value += jumpTo(i)
         cache[n] = value
         return value
@@ -18,5 +18,5 @@ class FrogJumping {
 
 fun main() {
     val struct = FrogJumping()
-    println(struct.jumpTo(30))
+    println(struct.jumpTo(4))
 }
