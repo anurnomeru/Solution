@@ -15,8 +15,6 @@ public class ScheduleThreadPoolExecutor extends ThreadPoolExecutor {
         BiConsumer<Runnable, ThreadPoolExecutor> abortPolicy) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, abortPolicy);
     }
-
-    public
 }
 
 
