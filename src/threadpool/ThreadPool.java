@@ -1,16 +1,8 @@
 package threadpool;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import com.google.common.collect.Lists;
 
 /**
  * Created by Anur IjuoKaruKas on 2019/6/19
