@@ -25,7 +25,6 @@ public class ScheduleThreadPoolExecutor extends ThreadPoolExecutor {
     public static void main(String[] args) throws InterruptedException {
 
         ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(10);
-        scheduled.schedule();
 
         //        scheduled.schedule(r, 1, TimeUnit.SECONDS);
         //                scheduled.scheduleAtFixedRate(r, 1, 1, TimeUnit.NANOSECONDS);
