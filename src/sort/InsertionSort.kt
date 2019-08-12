@@ -11,16 +11,15 @@ object InsertionSort {
     }
 
     fun insertion(l: Array<Int>, index: Int) {
-        if (index == l.size) {
-            return
-        } else {
-            for (i in index - 1 downTo 1) {
-                if (l[i] < l[i + 1]) {
-                    break
-                } else {
-                    val temp = l[i - 1]
-                    l[i - 1] = l[i]
-                    l[i] = temp
+        when (index == l.size) {
+            true -> return
+            false -> {
+                for (i in index downTo 1) {
+                    if (l[i - 1] > l[i]) {
+                        val temp = l[i];
+                        l[i] = l[i - 1]
+                        l[i - 1] = temp
+                    } else break
                 }
             }
         }
