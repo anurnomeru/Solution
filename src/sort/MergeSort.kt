@@ -30,8 +30,6 @@ object MergeSort {
         if (size > 1) {
             left = sort(left)
             right = sort(right)
-
-            println()
         }
 
         var leftPointer = 0
