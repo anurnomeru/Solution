@@ -76,7 +76,7 @@ class Slice(val arr: IntArray, val start: Int, val end: Int) {
 }
 
 fun main() {
-    val intArrayOf = intArrayOf(3, 5, 8, 1, 2, 9, 4, 7, 6)
+    val intArrayOf = intArrayOf(3, 5, 8, 1, 2, 9, 4, 7, 45,456,456,234,234,346,456,567,567,234,234,234234,455)
     val sort = QuickSort.sort(intArrayOf)
 
     println()
