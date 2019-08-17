@@ -1,5 +1,8 @@
 package hard;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Anur IjuoKaruKas on 2019/5/5
  */
@@ -8,7 +11,7 @@ public class FreqStack {
     private Node markNode = new Node();
 
     public FreqStack() {
-
+        Map m = new HashMap<>();
     }
 
     public static void main(String[] args) {

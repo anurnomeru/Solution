@@ -28,16 +28,6 @@ object ReserveK {
         current.next = null
     }
 
-//    private fun doReserveK(current: Node, k: Int, count: Int) {
-//        val next = current.next
-//        if (next == null) {
-//            head = current
-//            return
-//        }
-//        doReserveK(next, k)
-//        next.next = current
-//        current.next = null
-//    }
 
     fun insert(value: Int) {
         if (head == null) {
@@ -69,4 +59,7 @@ fun main() {
     ReserveK.insert(12)
     ReserveK.reserve()
     ReserveK.print()
+
+    "".hashCode()
+
 }
