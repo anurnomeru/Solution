@@ -8,6 +8,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import kt.easy1;
 
 /**
  * Created by Anur IjuoKaruKas on 2019/1/15
@@ -19,6 +20,8 @@ public class EchoClient {
     private final int port;
 
     public static void main(String[] args) throws Exception {
+        easy1.Companion.main();
+
         new EchoClient("localhost", 9876).start();
     }
 

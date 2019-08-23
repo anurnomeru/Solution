@@ -7,39 +7,38 @@ import java.util.Random
  */
 object BinaryTree {
 
-    class BinaryTree(var baseNode: Node? = null) {
+    class Node(val value: Int, var left: Node? = null, var right: Node? = null)
+
+    class BinaryTree(private var baseNode: Node? = null) {
 
         fun add(i: Int) {
-            if (baseNode == null) baseNode = Node(i)
-            else add(baseNode!!, i)
+            baseNode?.let { doAdd(it, i) } ?: let { baseNode = Node(i) }
         }
 
         fun traverse(doSomeThing: (Node, Int) -> Unit) {
-            if (baseNode == null) println("喵喵喵？？")
-            else traverse(baseNode!!, doSomeThing)
+            baseNode?.let { doTraverse(it, doSomeThing) }
         }
 
-        private fun add(node: Node, i: Int) {
-            if (i == node.value) println("喵喵喵？树中已有此节点")
-            if (i < node.value) {
-                if (node.left == null) node.left = Node(i) else add(node.left!!, i)
-            } else {
-                if (node.right == null) node.right = Node(i) else add(node.right!!, i)
+        private fun doAdd(node: Node, i: Int) {
+            when {
+                i == node.value -> println("喵喵喵？树中已有此节点")
+                i < node.value -> node.left?.let {doAdd(it, i)  }?:let { node.left == null }
+                else ->  if (node.right == null) node.right = Node(i) else doAdd(node.right!!, i)
             }
         }
 
-        private fun traverse(node: Node, doSomeThing: (Node, Int) -> Unit, times: Int = 0) {
-            if (node.left != null) traverse(node.left!!, doSomeThing, times + 1)
+        private fun doTraverse(node: Node, doSomeThing: (Node, Int) -> Unit, times: Int = 0) {
+            node.left?.let { doTraverse(it, doSomeThing, times + 1) }
             doSomeThing(node, times)
-            if (node.right != null) traverse(node.right!!, doSomeThing, times + 1)
+            node.right?.let { doTraverse(it, doSomeThing, times + 1) }
         }
     }
+
 }
 
-
-class Node(val value: Int, var left: Node? = null, var right: Node? = null)
-
 fun main() {
+
+
     val tree: BinaryTree.BinaryTree = BinaryTree.BinaryTree()
     val random = Random()
 
