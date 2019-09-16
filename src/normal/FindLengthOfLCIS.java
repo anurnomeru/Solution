@@ -22,7 +22,11 @@ public class FindLengthOfLCIS {
 
     public static void main(String[] args) {
         System.out.println(getMaxLength(new int[] {
-            2,2,2,2,2
+            2,
+            2,
+            2,
+            2,
+            2
         }));
     }
 
