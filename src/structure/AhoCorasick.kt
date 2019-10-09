@@ -4,7 +4,7 @@ package structure
 /**
  * Created by Anur IjuoKaruKas on 2019/10/8
  */
-object DicTree {
+object AhoCorasick {
 
     private val NONE = Node('?')
 
@@ -118,13 +118,13 @@ object DicTree {
 }
 
 fun main() {
-    DicTree.add("black")
-    DicTree.add("yellow")
-    DicTree.add("blue")
-    DicTree.add("anur")
-    DicTree.add("apple")
-    DicTree.add("plan")
-    DicTree.build()
+    AhoCorasick.add("black")
+    AhoCorasick.add("yellow")
+    AhoCorasick.add("blue")
+    AhoCorasick.add("anur")
+    AhoCorasick.add("apple")
+    AhoCorasick.add("plan")
+    AhoCorasick.build()
 
-    println(DicTree.containOne("anublapplan"))
+    println(AhoCorasick.containOne("anublapplan"))
 }
