@@ -30,21 +30,20 @@ object Kmp {
 
         while (matchingIndex < srcArr.size) {
             if (tarArr[tarIndex] == srcArr[matchingIndex]) {
-                if (tarIndex == tarArr.size - 1) {
+                if (tarIndex != tarArr.size - 1) {
+                    tarIndex++
+                } else {
                     println("from ${matchingIndex - tarIndex} to ${matchingIndex}")
                     tarIndex = commonIndex[tarIndex]
-                } else {
-                    tarIndex++
                 }
             } else {
                 tarIndex = commonIndex[tarIndex]
             }
             matchingIndex++
         }
-        println()
     }
 }
 
 fun main() {
-    Kmp.solution("123", "12223123")
+    Kmp.solution("Anur", "anurAnru-Anur-rrrrrAnnur-Anur-")
 }
