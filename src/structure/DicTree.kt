@@ -10,6 +10,59 @@ object DicTree {
 
     val HEAD = NONE
 
+    fun containOne(str: String): Boolean {
+        val strChar = str.toCharArray()
+        return matchIter(HEAD, strChar, 0)
+    }
+
+    fun matchIter(prev: Node, strChar: CharArray, index: Int): Boolean {
+        val c = strChar[index]
+
+        // 能继续往下走
+        return if (prev.next.containsKey(c)) {
+            val nextNode = prev.next[c]!!
+
+            return if (nextNode.endFlag) {
+                true
+            } else {
+                if (index + 1 == strChar.size) {
+                    return false
+                }
+                matchIter(nextNode, strChar, index + 1)
+            }
+
+        }
+        // 不能继续往下走
+        else {
+            when {
+                // 可以跳
+                prev.jumping != null && prev.jumping!!.next.containsKey(c) -> {
+                    val nextNode = prev.jumping!!.next[c]!!
+
+                    return if (nextNode.endFlag) {
+                        true
+                    } else {
+                        if (index + 1 == strChar.size) {
+                            return false
+                        }
+                        matchIter(nextNode, strChar, index + 1)
+                    }
+                }
+                // 不能跳
+                else -> {
+                    if (prev == HEAD) {
+                        if (index + 1 == strChar.size) {
+                            return false
+                        }
+                        matchIter(HEAD, strChar, index + 1)
+                    } else {
+                        matchIter(HEAD, strChar, index)
+                    }
+                }
+            }
+        }
+    }
+
     fun add(str: String) {
         addIter(HEAD, str.toCharArray(), 0)
     }
@@ -38,12 +91,14 @@ object DicTree {
      */
     private fun buildIter(prev: Node) {
         for (child in prev.next.values) {
-            when (prev.jumping) {
-                null ->   // 跳到根下
+            when {
+                prev == HEAD -> {
+                }
+                prev.jumping == null ->   // 跳到根下
                     if (HEAD.next.containsKey(child.value)) {
                         child.jumping = HEAD.next[child.value]
                     }
-                else ->
+                prev.jumping != null ->
                     if (prev.jumping!!.next.containsKey(child.value)) {
                         child.jumping = prev.jumping!!.next[child.value]
                     } else if (HEAD.next.containsKey(child.value)) {
@@ -67,5 +122,5 @@ fun main() {
     DicTree.add("dkflhisherthishim")
     DicTree.build()
 
-    println()
+    println(DicTree.containOne("hthresm"))
 }
