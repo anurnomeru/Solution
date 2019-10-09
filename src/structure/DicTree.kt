@@ -22,12 +22,14 @@ object DicTree {
         return if (prev.next.containsKey(c)) {
             val nextNode = prev.next[c]!!
 
+            println(c)
             return if (nextNode.endFlag) {
                 true
             } else {
                 if (index + 1 == strChar.size) {
                     return false
                 }
+
                 matchIter(nextNode, strChar, index + 1)
             }
 
@@ -39,6 +41,7 @@ object DicTree {
                 prev.jumping != null && prev.jumping!!.next.containsKey(c) -> {
                     val nextNode = prev.jumping!!.next[c]!!
 
+                    println("jump $c")
                     return if (nextNode.endFlag) {
                         true
                     } else {
@@ -115,12 +118,13 @@ object DicTree {
 }
 
 fun main() {
-    DicTree.add("his")
-    DicTree.add("her")
-    DicTree.add("him")
-    DicTree.add("this")
-    DicTree.add("dkflhisherthishim")
+    DicTree.add("black")
+    DicTree.add("yellow")
+    DicTree.add("blue")
+    DicTree.add("anur")
+    DicTree.add("apple")
+    DicTree.add("plan")
     DicTree.build()
 
-    println(DicTree.containOne("hthresm"))
+    println(DicTree.containOne("anublapplan"))
 }
