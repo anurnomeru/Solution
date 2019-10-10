@@ -1,5 +1,7 @@
 package structure
 
+import java.util.concurrent.atomic.AtomicInteger
+
 
 /**
  * Created by Anur IjuoKaruKas on 2019/10/8
@@ -10,28 +12,33 @@ object AhoCorasick {
 
     val HEAD = NONE
 
-    fun containOne(str: String): Boolean {
+    fun contain(str: String): Boolean {
         val strChar = str.toCharArray()
         return matchIter(HEAD, strChar, 0)
     }
 
+    val counter = AtomicInteger(0)
+
     fun matchIter(prev: Node, strChar: CharArray, index: Int): Boolean {
+        counter.incrementAndGet()
         val c = strChar[index]
 
         // 能继续往下走
         return if (prev.next.containsKey(c)) {
             val nextNode = prev.next[c]!!
 
-            println(c)
-            return if (nextNode.endFlag) {
-                true
-            } else {
-                if (index + 1 == strChar.size) {
-                    return false
-                }
-
-                matchIter(nextNode, strChar, index + 1)
+//            println("成功向下延伸 $c")
+            if (nextNode.endFlag) {
+                println("匹配 ${nextNode.word} ")
             }
+            if (index + 1 == strChar.size) {
+                println("char遍历次数总和 ${counter.get()}")
+                println("文本长度 ${strChar.size}")
+                return false
+            }
+
+            matchIter(nextNode, strChar, index + 1)
+
 
         }
         // 不能继续往下走
@@ -41,20 +48,23 @@ object AhoCorasick {
                 prev.jumping != null && prev.jumping!!.next.containsKey(c) -> {
                     val nextNode = prev.jumping!!.next[c]!!
 
-                    println("jump $c")
-                    return if (nextNode.endFlag) {
-                        true
-                    } else {
-                        if (index + 1 == strChar.size) {
-                            return false
-                        }
-                        matchIter(nextNode, strChar, index + 1)
+//                    println("进行失败跳转 $c")
+                    if (nextNode.endFlag) {
+                        println("匹配 ${nextNode.word} ")
                     }
+                    if (index + 1 == strChar.size) {
+                        return false
+                    }
+                    matchIter(nextNode, strChar, index + 1)
+
                 }
                 // 不能跳
                 else -> {
+//                    println("无法继续匹配 $c ，返回根节点")
                     if (prev == HEAD) {
                         if (index + 1 == strChar.size) {
+                            println("char遍历次数总和 ${counter.get()}")
+                            println("文本长度 ${strChar.size}")
                             return false
                         }
                         matchIter(HEAD, strChar, index + 1)
@@ -81,6 +91,7 @@ object AhoCorasick {
         return if (!endFlag) {
             addIter(current, arr, index + 1)
         } else {
+            current.word = String(arr)
             null
         }
     }
@@ -113,18 +124,21 @@ object AhoCorasick {
         }
     }
 
-    class Node(val value: Char, var endFlag: Boolean = false, var next: HashMap<Char, Node> = HashMap(), var jumping: Node? = null)
+    class Node(val value: Char, var endFlag: Boolean = false, var next: HashMap<Char, Node> = HashMap(), var jumping: Node? = null, var word: String? = null)
 
 }
 
 fun main() {
-    AhoCorasick.add("black")
-    AhoCorasick.add("yellow")
-    AhoCorasick.add("blue")
-    AhoCorasick.add("anur")
-    AhoCorasick.add("apple")
-    AhoCorasick.add("plan")
+    AhoCorasick.add("FINAL")
+    AhoCorasick.add("作品")
+    AhoCorasick.add("高分")
+    AhoCorasick.add("最终幻想")
+    AhoCorasick.add("出品")
+    AhoCorasick.add("Anur")
+    AhoCorasick.add("大猫")
+    AhoCorasick.add("其他词语")
+    AhoCorasick.add("萌萌哒")
     AhoCorasick.build()
 
-    println(AhoCorasick.containOne("anublapplan"))
+    AhoCorasick.contain("《最终幻想14》是史克威尔艾尼克斯出品的全球经典游戏品牌FINAL FANTASY系列的最新作品,IGN获得9.2高分!全球累计用户突破1600万!")
 }
