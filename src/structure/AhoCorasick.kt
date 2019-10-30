@@ -27,7 +27,6 @@ object AhoCorasick {
         return if (prev.next.containsKey(c)) {
             val nextNode = prev.next[c]!!
 
-//            println("成功向下延伸 $c")
             if (nextNode.endFlag) {
                 println("匹配 ${nextNode.word} ")
             }
@@ -48,7 +47,6 @@ object AhoCorasick {
                 prev.jumping != null && prev.jumping!!.next.containsKey(c) -> {
                     val nextNode = prev.jumping!!.next[c]!!
 
-//                    println("进行失败跳转 $c")
                     if (nextNode.endFlag) {
                         println("匹配 ${nextNode.word} ")
                     }
@@ -60,7 +58,6 @@ object AhoCorasick {
                 }
                 // 不能跳
                 else -> {
-//                    println("无法继续匹配 $c ，返回根节点")
                     if (prev == HEAD) {
                         if (index + 1 == strChar.size) {
                             println("char遍历次数总和 ${counter.get()}")
