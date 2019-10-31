@@ -5,6 +5,12 @@ import kotlin.math.max
 
 /**
  * Created by Anur IjuoKaruKas on 2019/10/31
+ *
+ * 给一串字符串，求最大连续括号的数量，有效情况包括
+ * ()()  -> 2
+ * (())  -> 2
+ * ()(() -> 1 因为括号不连续
+ * ()(()) ->3
  */
 object KakuSolution {
 
@@ -59,7 +65,7 @@ object KakuSolution {
 
                             // 匹配成功后进行回溯
                             var backTo = oriPointer
-                            inner@ for (j in backTo downTo  0) {
+                            inner@ for (j in backTo downTo 0) {
                                 if (s[j] != '1') {
                                     backTo = j
                                     break@inner
