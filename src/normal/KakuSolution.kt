@@ -49,6 +49,7 @@ object KakuSolution {
 
                     out@ while (true) {
                         if (sentinelPointer > max) {
+                            oriPointer++
                             break@out
                         } else if (s[sentinelPointer] == '1') {
                             sentinelPointer++
@@ -56,14 +57,24 @@ object KakuSolution {
                             s[sentinelPointer] = '1'
                             s[oriPointer] = '1'
 
-                            oriPointer = max(0, oriPointer - 2)
+                            // 匹配成功后进行回溯
+                            var backTo = oriPointer
+                            inner@ for (j in backTo downTo  0) {
+                                if (s[j] != '1') {
+                                    backTo = j
+                                    break@inner
+                                }
+                            }
+                            oriPointer = max(0, backTo)// 进行回溯
                             break@out
                         } else {
+                            oriPointer++
                             break@out
                         }
                     }
+                } else {
+                    oriPointer++
                 }
-                oriPointer++
             }
 
             println(s)
@@ -74,5 +85,5 @@ object KakuSolution {
 }
 
 fun main() {
-    KakuSolution.solution("(()()()()()())(6()()())(8(2()()()()())()()()())(")
+    KakuSolution.solution("((((()()()))))")
 }
