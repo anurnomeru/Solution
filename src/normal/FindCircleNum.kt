@@ -49,6 +49,8 @@ object FindCircleNum {
     }
 
     /**
+     * 心得：审题很重要！！不要想当然！
+     *
      * index 来表示当前为第几个学生
      * hasMarked 来进行排重，避免重复扫描
      * color 用于染色
