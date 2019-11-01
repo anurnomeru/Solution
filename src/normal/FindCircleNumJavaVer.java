@@ -2,6 +2,9 @@ package normal;
 
 /**
  * Created by Anur IjuoKaruKas on 2019/11/1
+ *
+ * 执行用时 : 1 ms, 在所有 java 提交中击败了 100.00% 的用户
+ * 内存消耗 : 38.5 MB, 在所有 java 提交中击败了 98.19% 的用户
  */
 public class FindCircleNumJavaVer {
 
