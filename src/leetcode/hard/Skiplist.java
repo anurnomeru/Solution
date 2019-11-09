@@ -185,7 +185,6 @@ public class Skiplist {
         if (compare.next != null && compare.next.val <= val) {// 后右
             return doAddRecursive(val, compare.next);
         }
-
         if (compare.shita != null) {// 最后下
             AnurNode sentinelFromResult = doAddRecursive(val, compare.shita);
             sentinelFromResult.sentinel = compare;
