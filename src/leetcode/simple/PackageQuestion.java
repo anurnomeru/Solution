@@ -39,18 +39,13 @@ public class PackageQuestion {
         }
 
         int notPut = maxValue(i - 1, capacity, packages);
-        System.out.println(String.format("容 %s 不放 %s 价值%s", capacity, i + 1, notPut));
 
         int put = maxValue(i - 1, capacity - thisPack.weight, packages) + thisPack.value;
-        System.out.println(String.format("容 %s 最大价值为 %s，放 %s 价值 %s", capacity - thisPack.weight, put - thisPack.value, i + 1, put));
-        System.out.println();
 
-        int max = Math.max(
+        return Math.max(
             notPut,
             put
         );
-
-        return max;
     }
 
     public static Package[] genPackage(int[] ints) {
