@@ -1,5 +1,7 @@
 package leetcode.hard;
 
+import io.netty.handler.codec.dns.DefaultDnsOptEcsRecord;
+
 /**
  * Created by Anur IjuoKaruKas on 2020/1/31
  * <p>
@@ -38,31 +40,40 @@ public class ReverseKGroup {
 
     public static void main(String[] args) {
         ListNode listNode = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4, new ListNode(5, new ListNode(6))))));
-        ListNode listNode1 = doReverseRec(listNode, 1, 6);
+        ListNode listNode1 = doReverseRec(listNode, 0, 2);
 
         System.out.println();
     }
 
     private static ListNode SENTINEL = new ListNode(999);
 
-    public static ListNode doReverseRec(ListNode thisNode, int nowCount, int k) {
-        boolean needReverse = nowCount == k;
-
-        if (thisNode.next == null) {
-            return SENTINEL;
+    /**
+     * return the current new head(old tail) of a reserve list
+     */
+    public static ListNode doReverseRec(ListNode prevNode, int prevCount, int k) {
+        if (prevNode.next == null) {
+            return null;
         }
-        ListNode nextNode = thisNode.next;
-        ListNode reserveHead = doReverseRec(nextNode, nowCount + 1, k);
+        ListNode thisNode = prevNode.next;
+        int thisCount = prevCount + 1;
+        boolean isTailNode = thisCount == k;
+        ListNode tailNode = doReverseRec(thisNode, thisCount, k);
 
-        if (reserveHead != null) {
-            nextNode.next = thisNode;
+        if (tailNode == null && !isTailNode) {
+            return null;
+        } else if (tailNode == null && k == 1) {
+            return thisNode;
         }
 
-        if (nowCount == 1) {
-            thisNode.next = reserveHead;
+        if (isTailNode) {
+            System.out.println(thisNode.val + " next is " + (tailNode == null ? null : thisNode.val));
+            thisNode.next = tailNode;
+        } else {
+            System.out.println(thisNode.val + " next is " + (prevNode.val));
+            thisNode.next = prevNode;
         }
 
-        return reserveHead;
+        return isTailNode ? thisNode : tailNode;
     }
 
     public static class ListNode {
